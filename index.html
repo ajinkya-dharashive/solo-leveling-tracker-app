@@ -1,0 +1,2582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYSTEM — Hunter's Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #0e0e16;
+  --bg3: #13131e;
+  --panel: #0f0f1a;
+  --border: #1e1e30;
+  --border-glow: #2a2a45;
+  --blue: #00d4ff;
+  --blue-dim: #0099bb;
+  --purple: #7b2fff;
+  --purple-dim: #5a1fbb;
+  --gold: #ffd700;
+  --gold-dim: #b8960a;
+  --green: #00ff9d;
+  --red: #ff3366;
+  --text: #c8d4e8;
+  --text-dim: #6a7a94;
+  --text-bright: #eef4ff;
+  --rank-f: #888;
+  --rank-e: #44aaff;
+  --rank-d: #44ff88;
+  --rank-c: #aa44ff;
+  --rank-b: #ffaa00;
+  --rank-a: #ff4444;
+  --rank-s: #ffd700;
+}
+/* LIGHT MODE */
+body.light {
+  --bg: #f4f6fc;
+  --bg2: #eaedfa;
+  --bg3: #e0e4f5;
+  --panel: #eceffe;
+  --border: #c4cae0;
+  --border-glow: #9da8cc;
+  --blue: #0068cc;
+  --blue-dim: #004d99;
+  --purple: #5500cc;
+  --purple-dim: #3d0099;
+  --gold: #996600;
+  --gold-dim: #664400;
+  --green: #006633;
+  --red: #bb0033;
+  --text: #1e2340;
+  --text-dim: #6270a0;
+  --text-bright: #0a0d1f;
+  --rank-f: #666;
+  --rank-e: #0068cc;
+  --rank-d: #006633;
+  --rank-c: #5500cc;
+  --rank-b: #996600;
+  --rank-a: #bb0033;
+  --rank-s: #996600;
+}
+body.light::before {
+  background:
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(85,0,204,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 80% 110%, rgba(0,104,204,0.04) 0%, transparent 70%);
+}
+body.light #header { background: rgba(244,246,252,0.97); }
+body.light .section { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+body.light .habit-xp-tag     { background: rgba(0,102,51,0.08); color: #006633; border-color: rgba(0,102,51,0.3); }
+body.light .habit-penalty-tag { background: rgba(187,0,51,0.08); color: #bb0033; border-color: rgba(187,0,51,0.3); }
+body.light .habit-diff-tag    { background: rgba(85,0,204,0.08); color: #5500cc; border-color: rgba(85,0,204,0.25); }
+body.light .habit-grace-tag   { background: rgba(153,102,0,0.1); color: #996600; border-color: rgba(153,102,0,0.35); }
+body.light .habit-rest-tag    { background: rgba(0,104,204,0.08); color: #0068cc; border-color: rgba(0,104,204,0.3); }
+body.light .t-badge { border-color: #996600; color: #996600; box-shadow: none; }
+body.light .t-pos   { border-color: #006633; color: #006633; }
+body.light .t-neg   { border-color: #bb0033; color: #bb0033; }
+body.light .t-info  { border-color: #0068cc; color: #0068cc; }
+body.light .lsc-done    { background: rgba(0,102,51,0.1); color: #006633; border-color: rgba(0,102,51,0.3); }
+body.light .lsc-grace   { background: rgba(153,102,0,0.1); color: #996600; border-color: rgba(153,102,0,0.35); }
+body.light .lsc-pending { background: rgba(85,0,204,0.08); color: #5500cc; border-color: rgba(85,0,204,0.25); }
+body.light .stat-STR .stat-val { color: #cc3300; }
+body.light .stat-STR .stat-bar { background: #cc3300; box-shadow: none; }
+body.light .stat-INT .stat-val { color: #0068cc; }
+body.light .stat-INT .stat-bar { background: #0068cc; box-shadow: none; }
+body.light .stat-END .stat-val { color: #006633; }
+body.light .stat-END .stat-bar { background: #006633; box-shadow: none; }
+body.light .stat-WIL .stat-val { color: #5500cc; }
+body.light .stat-WIL .stat-bar { background: #5500cc; box-shadow: none; }
+body.light .stat-AGI .stat-val { color: #996600; }
+body.light .stat-AGI .stat-bar { background: #996600; box-shadow: none; }
+body.light #xp-bar { box-shadow: none; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Exo 2', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(123,47,255,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 80% 110%, rgba(0,212,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.3s;
+}
+
+/* THEME TOGGLE */
+#theme-toggle {
+  background: none; border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 12px; cursor: pointer;
+  font-family: 'Rajdhani', sans-serif; font-size: 12px;
+  color: var(--text-dim); letter-spacing: 1px;
+  transition: all 0.2s; white-space: nowrap;
+}
+#theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--purple-dim); border-radius: 2px; }
+
+/* HEADER */
+#header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(10,10,15,0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+}
+#hunter-identity { display: flex; align-items: center; gap: 12px; }
+#rank-badge {
+  font-family: 'Cinzel', serif;
+  font-weight: 700; font-size: 13px;
+  padding: 4px 12px; border-radius: 3px;
+  border: 1px solid currentColor; letter-spacing: 2px;
+  text-shadow: 0 0 8px currentColor;
+  box-shadow: 0 0 12px currentColor, inset 0 0 12px rgba(255,255,255,0.05);
+  white-space: nowrap;
+}
+#hunter-name {
+  font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700;
+  color: var(--text-bright); cursor: pointer; letter-spacing: 1px;
+  border-bottom: 1px solid transparent; transition: all 0.2s;
+}
+#hunter-name:hover { border-color: var(--blue); color: var(--blue); }
+#xp-section { flex: 1; }
+#xp-label {
+  display: flex; justify-content: space-between;
+  font-family: 'Rajdhani', sans-serif; font-size: 12px;
+  color: var(--text-dim); margin-bottom: 4px; letter-spacing: 1px;
+}
+#xp-bar-wrap {
+  height: 8px; background: var(--bg3); border-radius: 4px;
+  border: 1px solid var(--border); overflow: hidden;
+}
+#xp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--purple), var(--blue));
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 10px var(--blue);
+  position: relative;
+}
+#xp-bar::after {
+  content: ''; position: absolute; right: 0; top: 0; bottom: 0;
+  width: 4px; background: white; border-radius: 2px;
+  box-shadow: 0 0 8px white; opacity: 0.8;
+}
+#streak-box { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+/* MAIN */
+#main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+/* SECTION */
+.section {
+  margin-bottom: 24px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+}
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, rgba(123,47,255,0.08), transparent);
+}
+.section-title {
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+  letter-spacing: 3px; color: var(--text-bright);
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title::before {
+  content: ''; width: 3px; height: 16px;
+  background: var(--purple); border-radius: 2px;
+  box-shadow: 0 0 8px var(--purple);
+}
+.section-body { padding: 16px 20px; }
+
+/* BTN */
+.btn {
+  font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 13px;
+  letter-spacing: 1.5px; padding: 7px 18px; border-radius: 4px;
+  border: 1px solid var(--blue); background: transparent;
+  color: var(--blue); cursor: pointer; transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn:hover { background: rgba(0,212,255,0.12); box-shadow: 0 0 16px rgba(0,212,255,0.4); }
+.btn-gold { border-color: var(--gold); color: var(--gold); }
+.btn-gold:hover { background: rgba(255,215,0,0.1); box-shadow: 0 0 16px rgba(255,215,0,0.4); }
+.btn-purple { border-color: var(--purple); color: var(--purple); }
+.btn-purple:hover { background: rgba(123,47,255,0.15); box-shadow: 0 0 16px rgba(123,47,255,0.4); }
+.btn-green { border-color: var(--green); color: var(--green); }
+.btn-green:hover { background: rgba(0,255,157,0.1); box-shadow: 0 0 16px rgba(0,255,157,0.3); }
+.btn-red { border-color: var(--red); color: var(--red); }
+.btn-red:hover { background: rgba(255,51,102,0.1); box-shadow: 0 0 12px rgba(255,51,102,0.3); }
+.btn-sm { padding: 4px 12px; font-size: 11px; }
+
+/* STATS */
+#stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.stat-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px 12px; text-align: center;
+  transition: border-color 0.3s;
+}
+.stat-card:hover { border-color: var(--border-glow); }
+.stat-name {
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; margin-bottom: 8px; color: var(--text-dim);
+}
+.stat-val {
+  font-family: 'Rajdhani', sans-serif; font-size: 28px;
+  font-weight: 700; line-height: 1; margin-bottom: 8px;
+}
+.stat-bar-wrap { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+.stat-bar { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+.stat-fullname { font-family: 'Exo 2', sans-serif; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-top: 5px; }
+.stat-STR .stat-val { color: #ff6644; }
+.stat-STR .stat-bar { background: #ff6644; box-shadow: 0 0 6px #ff6644; }
+.stat-INT .stat-val { color: #44aaff; }
+.stat-INT .stat-bar { background: #44aaff; box-shadow: 0 0 6px #44aaff; }
+.stat-END .stat-val { color: #44ff88; }
+.stat-END .stat-bar { background: #44ff88; box-shadow: 0 0 6px #44ff88; }
+.stat-WIL .stat-val { color: #cc44ff; }
+.stat-WIL .stat-bar { background: #cc44ff; box-shadow: 0 0 6px #cc44ff; }
+.stat-AGI .stat-val { color: #ffcc44; }
+.stat-AGI .stat-bar { background: #ffcc44; box-shadow: 0 0 6px #ffcc44; }
+
+/* QUESTS */
+#quest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.quest-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 16px; transition: border-color 0.3s;
+}
+.quest-card.recovery { border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.03); }
+.quest-card.completed { border-color: rgba(0,255,157,0.3); opacity: 0.7; }
+.quest-card.missed { border-color: rgba(255,51,102,0.3); opacity: 0.6; }
+.quest-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.quest-title {
+  font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 15px;
+  color: var(--text-bright); flex: 1; margin-right: 8px;
+}
+.diff-badge {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 2px; white-space: nowrap; letter-spacing: 1px;
+}
+.diff-easy     { background: rgba(68,255,136,0.15); color: #44ff88; border: 1px solid rgba(68,255,136,0.4); }
+.diff-moderate { background: rgba(0,212,255,0.12); color: #00d4ff; border: 1px solid rgba(0,212,255,0.4); }
+.diff-chall    { background: rgba(255,215,0,0.15); color: #ffd700; border: 1px solid rgba(255,215,0,0.4); }
+.diff-hard     { background: rgba(255,140,0,0.15); color: #ff8c00; border: 1px solid rgba(255,140,0,0.4); }
+.diff-extreme  { background: rgba(255,51,102,0.15); color: #ff3366; border: 1px solid rgba(255,51,102,0.4); }
+body.light .diff-easy     { background: rgba(0,102,51,0.1);   color: #006633; border-color: rgba(0,102,51,0.35); }
+body.light .diff-moderate { background: rgba(0,104,204,0.1);  color: #0068cc; border-color: rgba(0,104,204,0.35); }
+body.light .diff-chall    { background: rgba(153,102,0,0.1);  color: #996600; border-color: rgba(153,102,0,0.35); }
+body.light .diff-hard     { background: rgba(180,80,0,0.1);   color: #b45000; border-color: rgba(180,80,0,0.35); }
+body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; border-color: rgba(187,0,51,0.35); }
+.quest-desc { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; line-height: 1.5; }
+.quest-footer { display: flex; justify-content: space-between; align-items: center; }
+.quest-xp { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; color: var(--gold); }
+.quest-timer { font-family: 'Rajdhani', sans-serif; font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
+.quest-timer.urgent { color: var(--red); animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0.3; } }
+.quest-actions { display: flex; gap: 6px; margin-top: 10px; }
+.recovery-banner {
+  background: linear-gradient(90deg, rgba(255,215,0,0.08), rgba(255,215,0,0.03));
+  border: 1px solid rgba(255,215,0,0.3); border-radius: 6px;
+  padding: 12px 16px; margin-bottom: 14px;
+  display: none; align-items: center; gap: 12px;
+  animation: glow-gold 2s infinite;
+}
+@keyframes glow-gold {
+  0%,100% { box-shadow: 0 0 8px rgba(255,215,0,0.2); }
+  50% { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+}
+.recovery-banner-text { font-family: 'Rajdhani', sans-serif; font-size: 13px; color: var(--gold); flex: 1; }
+
+/* HABITS */
+#habit-xp-bar-wrap {
+  margin-bottom: 14px; background: var(--bg3);
+  border-radius: 4px; border: 1px solid var(--border);
+  padding: 8px 14px; display: flex; align-items: center; gap: 12px;
+}
+.habit-xp-label { font-family: 'Rajdhani', sans-serif; font-size: 12px; color: var(--text-dim); white-space: nowrap; letter-spacing: 1px; }
+#habit-daily-bar-wrap { flex: 1; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+#habit-daily-bar { height: 100%; background: linear-gradient(90deg, var(--blue), var(--green)); border-radius: 3px; transition: width 0.6s ease; }
+#habit-xp-count { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; color: var(--blue); white-space: nowrap; }
+#habit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.habit-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px; position: relative; transition: border-color 0.3s;
+}
+.habit-card.done { border-color: rgba(0,255,157,0.3); }
+.habit-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.habit-name { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 14px; color: var(--text-bright); }
+.habit-cat { font-size: 18px; }
+.habit-streak { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; color: var(--gold); margin-bottom: 2px; }
+.habit-streak-label { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 8px; }
+.habit-meta { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.habit-xp-tag { font-family: 'Rajdhani', sans-serif; font-size: 11px; padding: 2px 8px; border-radius: 2px; background: rgba(0,255,157,0.1); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
+.habit-penalty-tag { font-family: 'Rajdhani', sans-serif; font-size: 11px; padding: 2px 8px; border-radius: 2px; background: rgba(255,51,102,0.1); color: var(--red); border: 1px solid rgba(255,51,102,0.3); }
+.habit-diff-tag { font-family: 'Rajdhani', sans-serif; font-size: 11px; padding: 2px 8px; border-radius: 2px; background: rgba(123,47,255,0.1); color: var(--purple); border: 1px solid rgba(123,47,255,0.3); }
+.habit-done-mark { font-size: 13px; text-align: center; color: var(--green); font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; padding: 6px; border: 1px solid rgba(0,255,157,0.3); border-radius: 4px; }
+.habit-best { font-size: 10px; color: var(--text-dim); margin-top: 6px; letter-spacing: 1px; }
+.delete-btn { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; opacity: 0.4; transition: opacity 0.2s; }
+.delete-btn:hover { opacity: 1; color: var(--red); }
+.edit-btn { position: absolute; top: 8px; right: 28px; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; opacity: 0.4; transition: opacity 0.2s; }
+.edit-btn:hover { opacity: 1; color: var(--blue); }
+
+/* LOG STREAK CARDS */
+#log-streak-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;
+}
+.log-streak-card {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+  padding: 12px 16px; display: flex; align-items: center; gap: 14px;
+  transition: border-color 0.3s;
+}
+.log-streak-card.active { border-color: rgba(0,255,157,0.3); }
+.log-streak-card.grace  { border-color: rgba(255,215,0,0.4); animation: glow-gold 2s infinite; }
+.lsc-icon { font-size: 26px; flex-shrink: 0; }
+.lsc-body { flex: 1; }
+.lsc-title {
+  font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px;
+  color: var(--text-dim); margin-bottom: 4px;
+}
+.lsc-streak {
+  font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 22px;
+  color: var(--gold); line-height: 1;
+}
+.lsc-streak span { font-size: 12px; color: var(--text-dim); font-weight: 400; margin-left: 4px; }
+.lsc-meta {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; color: var(--text-dim);
+  margin-top: 2px; letter-spacing: 0.5px;
+}
+.lsc-badge {
+  font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 2px; letter-spacing: 1px; white-space: nowrap;
+}
+.lsc-done  { background: rgba(0,255,157,0.1); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
+.lsc-grace { background: rgba(255,215,0,0.1); color: var(--gold); border: 1px solid rgba(255,215,0,0.4); }
+.lsc-pending { background: rgba(123,47,255,0.1); color: var(--purple); border: 1px solid rgba(123,47,255,0.3); }
+
+/* QUICK LOG */
+#quick-log-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.log-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+.log-panel-title {
+  font-family: 'Cinzel', serif; font-size: 11px;
+  letter-spacing: 2px; color: var(--text-dim);
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.field { margin-bottom: 10px; }
+.field label { display: block; font-family: 'Rajdhani', sans-serif; font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 4px; text-transform: uppercase; }
+.field input, .field select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 8px 10px; color: var(--text);
+  font-family: 'Exo 2', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s;
+}
+.field input:focus, .field select:focus { border-color: var(--blue); }
+.field select option { background: var(--bg2); }
+.radio-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.radio-btn {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px;
+  padding: 4px 10px; border-radius: 3px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-dim); cursor: pointer;
+  transition: all 0.2s; letter-spacing: 1px;
+}
+.radio-btn.active { border-color: var(--blue); color: var(--blue); background: rgba(0,212,255,0.1); }
+.flavor-text {
+  margin-top: 10px; font-style: italic; font-size: 12px;
+  color: var(--purple); min-height: 18px; opacity: 0;
+  transition: opacity 0.5s; letter-spacing: 0.5px;
+}
+.flavor-text.show { opacity: 1; }
+
+/* BADGES */
+#badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.badge-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px 10px; text-align: center; transition: all 0.3s;
+}
+.badge-card.locked { opacity: 0.35; filter: grayscale(1); }
+.badge-card.unlocked { border-color: rgba(255,215,0,0.5); box-shadow: 0 0 16px rgba(255,215,0,0.15); }
+.badge-icon { font-size: 26px; margin-bottom: 6px; display: block; }
+.badge-name { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; }
+.badge-card.unlocked .badge-name { color: var(--gold); }
+.badge-card.locked .badge-name { color: #333; }
+.badge-date { font-size: 10px; color: var(--text-dim); }
+
+/* FREEZE TOKENS */
+#freeze-box {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'Rajdhani', sans-serif; font-size: 13px;
+  color: var(--blue); letter-spacing: 1px; white-space: nowrap;
+}
+#freeze-count { font-weight: 700; font-size: 16px; }
+.btn-freeze {
+  border-color: var(--blue); color: var(--blue); font-size: 11px;
+  padding: 3px 10px;
+}
+.btn-freeze:hover { background: rgba(0,212,255,0.12); box-shadow: 0 0 12px rgba(0,212,255,0.3); }
+.btn-freeze:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
+
+/* REST DAY PICKER */
+.rest-days-wrap { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+.day-btn {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700;
+  width: 34px; height: 28px; border-radius: 3px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.day-btn.rest { border-color: var(--green); color: var(--green); background: rgba(0,255,157,0.1); }
+
+/* HABIT CARD REST / GRACE indicators */
+.habit-rest-tag {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; padding: 2px 8px;
+  border-radius: 2px; background: rgba(0,212,255,0.1); color: var(--blue);
+  border: 1px solid rgba(0,212,255,0.3); letter-spacing: 1px;
+}
+.habit-grace-tag {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px; padding: 2px 8px;
+  border-radius: 2px; background: rgba(255,215,0,0.1); color: var(--gold);
+  border: 1px solid rgba(255,215,0,0.3); letter-spacing: 1px;
+  animation: pulse-gold 2s infinite;
+}
+@keyframes pulse-gold {
+  0%,100% { box-shadow: 0 0 4px rgba(255,215,0,0.3); }
+  50% { box-shadow: 0 0 10px rgba(255,215,0,0.6); }
+}
+/* Quest grace indicator */
+.quest-grace {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px;
+  color: var(--gold); letter-spacing: 1px; margin-top: 6px;
+  padding: 4px 8px; border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 3px; background: rgba(255,215,0,0.05);
+  display: inline-block;
+}
+
+/* WEIGHT TRACKER */
+#weight-section { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: start; }
+#weight-log-panel {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 6px; padding: 16px; min-width: 180px;
+}
+.weight-panel-title {
+  font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px;
+  color: var(--text-dim); margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+#weight-input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+#weight-input {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 8px 10px; color: var(--text);
+  font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700;
+  outline: none; transition: border-color 0.2s; width: 90px; text-align: center;
+}
+#weight-input:focus { border-color: var(--blue); }
+#weight-unit-toggle {
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; letter-spacing: 1px;
+  padding: 6px 10px; border-radius: 3px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+}
+#weight-unit-toggle:hover { border-color: var(--blue); color: var(--blue); }
+#weight-today-display {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px;
+  color: var(--text-dim); letter-spacing: 1px; min-height: 16px; margin-bottom: 10px;
+}
+#weight-canvas-wrap { flex: 1; position: relative; height: 180px; min-width: 0; }
+#weight-canvas { width: 100%; height: 100%; }
+#weight-stats-row { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+.w-stat { font-family: 'Rajdhani', sans-serif; font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+.w-stat strong { color: var(--text-bright); font-size: 15px; display: block; }
+@media (max-width: 700px) { #weight-section { grid-template-columns: 1fr; } }
+
+#chart-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.chart-tab {
+  font-family: 'Rajdhani', sans-serif; font-size: 12px; letter-spacing: 1px;
+  padding: 5px 14px; border-radius: 3px; border: 1px solid var(--border);
+  background: var(--bg3); color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+}
+.chart-tab.active { border-color: var(--blue); color: var(--blue); background: rgba(0,212,255,0.08); }
+#chart-canvas-wrap { position: relative; width: 100%; height: 200px; }
+#chart-canvas { width: 100%; height: 100%; }
+
+/* DATA TOOLBAR */
+#data-toolbar {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  padding: 12px 16px; background: var(--bg3);
+  border-top: 1px solid var(--border); margin-top: 14px; border-radius: 0 0 8px 8px;
+}
+#data-toolbar span {
+  font-family: 'Rajdhani', sans-serif; font-size: 11px;
+  color: var(--text-dim); letter-spacing: 1px; margin-right: 4px;
+}
+#import-file { display: none; }
+
+/* HISTORY */
+#history-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.history-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; background: var(--bg3); border-radius: 4px;
+  border-left: 2px solid transparent; font-size: 12px;
+}
+.history-item.pos { border-left-color: var(--green); }
+.history-item.neg { border-left-color: var(--red); }
+.history-label { flex: 1; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 13px; }
+.history-xp { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 13px; }
+.history-xp.pos { color: var(--green); }
+.history-xp.neg { color: var(--red); }
+.history-time { font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+
+/* MODAL */
+#modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(4px); z-index: 1000;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+#modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg2); border: 1px solid var(--border-glow);
+  border-radius: 10px; padding: 24px; width: 100%; max-width: 420px;
+  box-shadow: 0 0 40px rgba(123,47,255,0.3); position: relative;
+}
+.modal-title {
+  font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600;
+  letter-spacing: 3px; color: var(--text-bright);
+  margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+.modal-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 18px; transition: color 0.2s; }
+.modal-close:hover { color: var(--red); }
+.slider-wrap { display: flex; align-items: center; gap: 10px; }
+.slider-wrap input[type=range] { flex: 1; accent-color: var(--purple); }
+.slider-val { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; color: var(--blue); min-width: 32px; text-align: right; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.xp-preview { font-family: 'Rajdhani', sans-serif; font-size: 12px; color: var(--gold); letter-spacing: 1px; margin-top: 8px; }
+
+/* OVERLAYS */
+#levelup-overlay, #rankup-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; text-align: center; pointer-events: none;
+}
+#levelup-overlay.show, #rankup-overlay.show { display: flex; animation: fadein 0.3s ease; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+#levelup-overlay { background: rgba(0,0,0,0.93); }
+#rankup-overlay { background: radial-gradient(ellipse at center, rgba(123,47,255,0.3) 0%, rgba(0,0,0,0.95) 70%); }
+.overlay-big {
+  font-family: 'Cinzel', serif; font-weight: 900; font-size: 56px;
+  letter-spacing: 8px; animation: text-pop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes text-pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+#lu-text { color: var(--gold); text-shadow: 0 0 30px var(--gold), 0 0 60px rgba(255,215,0,0.5); }
+#ru-text { color: var(--purple); text-shadow: 0 0 30px var(--purple), 0 0 60px rgba(123,47,255,0.5); }
+.overlay-sub { font-family: 'Rajdhani', sans-serif; font-size: 20px; color: var(--text-bright); letter-spacing: 3px; margin-top: 12px; animation: text-pop 0.5s 0.2s both; }
+.overlay-sub2 { font-family: 'Exo 2', sans-serif; font-size: 14px; color: var(--text-dim); letter-spacing: 2px; margin-top: 8px; font-style: italic; animation: text-pop 0.5s 0.35s both; }
+#particles { position: absolute; inset: 0; pointer-events: none; }
+.particle {
+  position: absolute; width: 6px; height: 6px; border-radius: 50%;
+  animation: p-burst 1.2s ease-out forwards;
+}
+@keyframes p-burst {
+  from { transform: translate(0,0) scale(1); opacity: 1; }
+  to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+.shockwave {
+  position: absolute; width: 100px; height: 100px;
+  border-radius: 50%; border: 2px solid var(--purple);
+  animation: shock-expand 1.5s ease-out infinite;
+}
+@keyframes shock-expand {
+  from { transform: scale(0); opacity: 1; }
+  to { transform: scale(8); opacity: 0; }
+}
+
+/* BELL NOTIFICATION */
+#bell-wrap {
+  position: relative; display: inline-flex; align-items: center;
+}
+#bell-btn {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 10px; cursor: pointer; font-size: 18px;
+  transition: all 0.2s; position: relative; line-height: 1;
+  color: var(--text-dim);
+}
+#bell-btn:hover { border-color: var(--gold); box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+#bell-btn.has-items { border-color: var(--gold); color: var(--gold); animation: bell-ring 2s ease infinite; }
+@keyframes bell-ring {
+  0%,100%,60% { transform: rotate(0); }
+  65% { transform: rotate(-12deg); }
+  70% { transform: rotate(12deg); }
+  75% { transform: rotate(-8deg); }
+  80% { transform: rotate(8deg); }
+  85% { transform: rotate(0); }
+}
+#bell-badge {
+  position: absolute; top: -6px; right: -6px;
+  background: var(--red); color: white; border-radius: 50%;
+  width: 18px; height: 18px; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Rajdhani', sans-serif; pointer-events: none;
+  box-shadow: 0 0 6px var(--red);
+}
+#bell-badge.hidden { display: none; }
+
+#notif-panel {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  width: 320px; max-height: 420px; overflow-y: auto;
+  background: var(--bg2); border: 1px solid var(--border-glow);
+  border-radius: 10px; box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  z-index: 500; display: none; flex-direction: column;
+}
+#notif-panel.open { display: flex; }
+.notif-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 2px;
+  color: var(--text-bright); flex-shrink: 0;
+}
+.notif-header-actions { display: flex; gap: 6px; }
+.notif-clear-btn {
+  font-family: 'Rajdhani', sans-serif; font-size: 10px; letter-spacing: 1px;
+  padding: 2px 8px; border-radius: 3px; border: 1px solid var(--border);
+  background: none; color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+}
+.notif-clear-btn:hover { border-color: var(--red); color: var(--red); }
+.notif-list { display: flex; flex-direction: column; padding: 8px; gap: 6px; }
+.notif-item {
+  background: var(--bg3); border-radius: 6px; padding: 10px 12px;
+  border-left: 3px solid var(--border); position: relative;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.notif-item.quest  { border-left-color: var(--gold); }
+.notif-item.habit  { border-left-color: var(--purple); }
+.notif-item.urgent { border-left-color: var(--red); }
+.notif-item.done   { opacity: 0.35; text-decoration: line-through; }
+.notif-item-top {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+}
+.notif-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.notif-text { flex: 1; }
+.notif-title {
+  font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 13px;
+  color: var(--text-bright); line-height: 1.3;
+}
+.notif-item.done .notif-title { color: var(--text-dim); }
+.notif-sub {
+  font-family: 'Exo 2', sans-serif; font-size: 11px; color: var(--text-dim);
+  margin-top: 2px; line-height: 1.4;
+}
+.notif-dismiss {
+  background: none; border: none; color: var(--text-dim); cursor: pointer;
+  font-size: 12px; padding: 2px; transition: color 0.2s; flex-shrink: 0;
+}
+.notif-dismiss:hover { color: var(--red); }
+.notif-empty {
+  text-align: center; padding: 24px 16px;
+  font-family: 'Rajdhani', sans-serif; font-size: 13px;
+  color: var(--text-dim); letter-spacing: 1px;
+}
+
+/* TOASTS */
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast {
+  background: var(--bg2); border-radius: 6px; padding: 10px 16px;
+  font-family: 'Rajdhani', sans-serif; font-size: 13px; letter-spacing: 1px;
+  animation: toast-in 0.3s ease, toast-out 0.3s 2.7s ease forwards;
+  min-width: 220px; max-width: 320px;
+}
+@keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toast-out { from { opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+.t-badge { border: 1px solid var(--gold); color: var(--gold); box-shadow: 0 0 12px rgba(255,215,0,0.3); }
+.t-pos { border: 1px solid var(--green); color: var(--green); }
+.t-neg { border: 1px solid var(--red); color: var(--red); }
+.t-info { border: 1px solid var(--blue); color: var(--blue); }
+
+/* EMPTY */
+.empty-state { text-align: center; padding: 30px; color: var(--text-dim); font-family: 'Rajdhani', sans-serif; font-size: 13px; letter-spacing: 1px; }
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  #stats-grid { grid-template-columns: repeat(3,1fr); }
+  #quick-log-grid { grid-template-columns: 1fr; }
+  #header { grid-template-columns: 1fr; gap: 8px; }
+  .overlay-big { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="hunter-identity">
+    <div id="rank-badge">F RANK</div>
+    <div id="hunter-name">HUNTER</div>
+  </div>
+  <div id="xp-section">
+    <div id="xp-label">
+      <span id="xp-level-text">LEVEL 1</span>
+      <span id="xp-count-text">0 / 1000 XP</span>
+    </div>
+    <div id="xp-bar-wrap"><div id="xp-bar" style="width:0%"></div></div>
+  </div>
+  <div id="streak-box">
+    <div id="freeze-box">
+      <span>🧊</span><span id="freeze-count">0</span><span style="font-size:11px;color:var(--text-dim)">FREEZES</span>
+      <button class="btn btn-freeze btn-sm" onclick="useFreeze()" id="freeze-btn" disabled>USE</button>
+    </div>
+    <div id="bell-wrap">
+      <button id="bell-btn" onclick="toggleNotifPanel()" title="Daily Briefing">🔔</button>
+      <div id="bell-badge" class="hidden">0</div>
+      <div id="notif-panel">
+        <div class="notif-header">
+          DAILY BRIEFING
+          <div class="notif-header-actions">
+            <button class="notif-clear-btn" onclick="dismissAllNotifs()">CLEAR ALL</button>
+          </div>
+        </div>
+        <div class="notif-list" id="notif-list"></div>
+      </div>
+    </div>
+    <button id="theme-toggle" onclick="toggleTheme()">☀ LIGHT</button>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- STATS -->
+  <div class="section">
+    <div class="section-header"><div class="section-title">CHARACTER STATS</div></div>
+    <div class="section-body">
+      <div id="stats-grid">
+        <div class="stat-card stat-STR"><div class="stat-name">STR</div><div class="stat-val" id="stat-STR">0</div><div class="stat-bar-wrap"><div class="stat-bar" id="bar-STR" style="width:0%"></div></div><div class="stat-fullname">Strength</div></div>
+        <div class="stat-card stat-INT"><div class="stat-name">INT</div><div class="stat-val" id="stat-INT">0</div><div class="stat-bar-wrap"><div class="stat-bar" id="bar-INT" style="width:0%"></div></div><div class="stat-fullname">Intelligence</div></div>
+        <div class="stat-card stat-END"><div class="stat-name">END</div><div class="stat-val" id="stat-END">0</div><div class="stat-bar-wrap"><div class="stat-bar" id="bar-END" style="width:0%"></div></div><div class="stat-fullname">Endurance</div></div>
+        <div class="stat-card stat-WIL"><div class="stat-name">WIL</div><div class="stat-val" id="stat-WIL">0</div><div class="stat-bar-wrap"><div class="stat-bar" id="bar-WIL" style="width:0%"></div></div><div class="stat-fullname">Willpower</div></div>
+        <div class="stat-card stat-AGI"><div class="stat-name">AGI</div><div class="stat-val" id="stat-AGI">0</div><div class="stat-bar-wrap"><div class="stat-bar" id="bar-AGI" style="width:0%"></div></div><div class="stat-fullname">Agility</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">DAILY QUESTS</div>
+      <button class="btn btn-sm" onclick="openQuestModal()">+ ADD QUEST</button>
+    </div>
+    <div class="section-body">
+      <div id="recovery-banner" class="recovery-banner">
+        <span style="font-size:22px">⚡</span>
+        <div class="recovery-banner-text">
+          <strong>RECOVERY QUEST AVAILABLE</strong><br>
+          <span style="font-size:11px;font-weight:400">The System offers a chance to reclaim your honor. A recovery quest awaits.</span>
+        </div>
+      </div>
+      <div id="quest-grid"></div>
+      <div id="quest-empty" class="empty-state">No active quests. The hunt has not yet begun.</div>
+    </div>
+  </div>
+
+  <!-- HABITS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">HABIT TRACKER</div>
+      <button class="btn btn-sm btn-purple" onclick="openHabitModal()">+ ADD HABIT</button>
+    </div>
+    <div class="section-body">
+      <div id="habit-xp-bar-wrap">
+        <span class="habit-xp-label">DAILY HABIT XP</span>
+        <div id="habit-daily-bar-wrap"><div id="habit-daily-bar" style="width:0%"></div></div>
+        <span id="habit-xp-count">0 / 100 XP</span>
+      </div>
+      <div id="habit-grid"></div>
+      <div id="habit-empty" class="empty-state">No habits tracked. Build your first habit to level up your life.</div>
+    </div>
+  </div>
+
+  <!-- QUICK LOG -->
+  <div class="section">
+    <div class="section-header"><div class="section-title">QUICK LOG</div></div>
+    <div class="section-body">
+      <!-- STREAK TRACKERS -->
+      <div id="log-streak-row">
+        <div class="log-streak-card" id="lsc-workout">
+          <div class="lsc-icon">⚔️</div>
+          <div class="lsc-body">
+            <div class="lsc-title">WORKOUT STREAK</div>
+            <div class="lsc-streak" id="lsc-w-streak">0 <span>days</span></div>
+            <div class="lsc-meta" id="lsc-w-meta">Best: 0 · Total: 0 logs</div>
+          </div>
+          <div class="lsc-badge lsc-pending" id="lsc-w-badge">TODAY</div>
+        </div>
+        <div class="log-streak-card" id="lsc-study">
+          <div class="lsc-icon">📖</div>
+          <div class="lsc-body">
+            <div class="lsc-title">STUDY STREAK</div>
+            <div class="lsc-streak" id="lsc-s-streak">0 <span>days</span></div>
+            <div class="lsc-meta" id="lsc-s-meta">Best: 0 · Total: 0 logs</div>
+          </div>
+          <div class="lsc-badge lsc-pending" id="lsc-s-badge">TODAY</div>
+        </div>
+      </div>
+      <div id="quick-log-grid">
+        <div class="log-panel">
+          <div class="log-panel-title">⚔ WORKOUT LOG</div>
+          <div class="field"><label>Activity</label><input id="w-activity" type="text" placeholder="e.g. Running, Push-ups..."></div>
+          <div class="field"><label>Duration (minutes)</label><input id="w-duration" type="number" placeholder="30" min="1"></div>
+          <div class="field">
+            <label>Intensity</label>
+            <div class="radio-group" id="w-intensity">
+              <span class="radio-btn active" data-val="Low">LOW</span>
+              <span class="radio-btn" data-val="Med">MEDIUM</span>
+              <span class="radio-btn" data-val="High">HIGH</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Stat to increase</label>
+            <div class="radio-group" id="w-stat">
+              <span class="radio-btn active" data-val="STR">STR</span>
+              <span class="radio-btn" data-val="END">END</span>
+              <span class="radio-btn" data-val="AGI">AGI</span>
+            </div>
+          </div>
+          <button class="btn btn-green" style="width:100%;margin-top:6px" onclick="logWorkout()">LOG WORKOUT</button>
+          <div class="flavor-text" id="w-flavor"></div>
+        </div>
+        <div class="log-panel">
+          <div class="log-panel-title">📖 STUDY LOG</div>
+          <div class="field"><label>Subject</label><input id="s-subject" type="text" placeholder="e.g. Mathematics, Coding..."></div>
+          <div class="field"><label>Duration (minutes)</label><input id="s-duration" type="number" placeholder="45" min="1"></div>
+          <div class="field">
+            <label>Focus Level</label>
+            <div class="radio-group" id="s-focus">
+              <span class="radio-btn active" data-val="Distracted">DISTRACTED</span>
+              <span class="radio-btn" data-val="Focused">FOCUSED</span>
+              <span class="radio-btn" data-val="Deep">DEEP</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Stat to increase</label>
+            <div class="radio-group" id="s-stat">
+              <span class="radio-btn active" data-val="INT">INT</span>
+              <span class="radio-btn" data-val="WIL">WIL</span>
+            </div>
+          </div>
+          <button class="btn btn-purple" style="width:100%;margin-top:6px" onclick="logStudy()">LOG STUDY</button>
+          <div class="flavor-text" id="s-flavor"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEIGHT TRACKER -->
+  <div class="section">
+    <div class="section-header"><div class="section-title">WEIGHT TRACKER</div></div>
+    <div class="section-body">
+      <div id="weight-section">
+        <div id="weight-log-panel">
+          <div class="weight-panel-title">⚖ LOG WEIGHT</div>
+          <div id="weight-input-row">
+            <input id="weight-input" type="number" step="0.1" min="1" placeholder="70.0">
+            <button id="weight-unit-toggle" onclick="toggleWeightUnit()">KG</button>
+          </div>
+          <div id="weight-today-display"></div>
+          <button class="btn btn-sm btn-gold" style="width:100%" onclick="logWeight()">LOG</button>
+        </div>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+          <div id="weight-canvas-wrap"><canvas id="weight-canvas"></canvas></div>
+          <div id="weight-stats-row">
+            <div class="w-stat"><strong id="w-current">—</strong>CURRENT</div>
+            <div class="w-stat"><strong id="w-start">—</strong>STARTING</div>
+            <div class="w-stat"><strong id="w-change">—</strong>CHANGE</div>
+            <div class="w-stat"><strong id="w-low">—</strong>LOWEST</div>
+            <div class="w-stat"><strong id="w-high">—</strong>HIGHEST</div>
+            <div class="w-stat"><strong id="w-entries">0</strong>ENTRIES</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS CHART -->
+  <div class="section">
+    <div class="section-header"><div class="section-title">PROGRESS ANALYTICS</div></div>
+    <div class="section-body">
+      <div id="chart-tabs">
+        <div class="chart-tab active" data-chart="xp" onclick="switchChart('xp')">XP HISTORY</div>
+        <div class="chart-tab" data-chart="stats" onclick="switchChart('stats')">STAT RADAR</div>
+        <div class="chart-tab" data-chart="habits" onclick="switchChart('habits')">HABIT STREAKS</div>
+      </div>
+      <div id="chart-canvas-wrap"><canvas id="chart-canvas"></canvas></div>
+    </div>
+  </div>
+
+  <!-- BADGES -->
+  <div class="section">
+    <div class="section-header"><div class="section-title">TROPHY ROOM</div></div>
+    <div class="section-body"><div id="badge-grid"></div></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="section">
+    <div class="section-header"><div class="section-title">ACTIVITY HISTORY</div></div>
+    <div class="section-body">
+      <div id="history-list"></div>
+      <div id="history-empty" class="empty-state">No activity recorded yet.</div>
+    </div>
+    <div id="data-toolbar">
+      <span>DATA:</span>
+      <button class="btn btn-sm btn-gold" onclick="exportJSON()">⬇ EXPORT JSON</button>
+      <button class="btn btn-sm btn-purple" onclick="document.getElementById('import-file').click()">⬆ IMPORT JSON</button>
+      <input type="file" id="import-file" accept=".json" onchange="importJSON(event)">
+    </div>
+  </div>
+
+</div>
+
+<!-- MODALS -->
+<div id="modal-overlay">
+  <div class="modal" id="quest-modal" style="display:none">
+    <div class="modal-title">NEW QUEST</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="field"><label>Quest Title</label><input id="q-title" type="text" placeholder="Define your mission..."></div>
+    <div class="field"><label>Description</label><input id="q-desc" type="text" placeholder="What needs to be done?"></div>
+    <div class="field">
+      <label>Difficulty — <span id="q-diff-label">1.0 (Easy)</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="q-diff" min="1" max="3" step="0.5" value="1" oninput="updateQDiff()">
+        <span class="slider-val" id="q-diff-val">1.0</span>
+      </div>
+    </div>
+    <div class="xp-preview">XP REWARD: <span id="q-xp-preview">150</span> XP</div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal()">CANCEL</button>
+      <button class="btn btn-sm btn-gold" onclick="createQuest()">CREATE QUEST</button>
+    </div>
+  </div>
+
+  <div class="modal" id="habit-modal" style="display:none">
+    <div class="modal-title">NEW HABIT</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="field"><label>Habit Name</label><input id="h-name" type="text" placeholder="What will you do daily?"></div>
+    <div class="field">
+      <label>Category</label>
+      <select id="h-cat">
+        <option>Health</option><option>Productivity</option><option>Learning</option>
+        <option>Finance</option><option>Relationships</option><option>Creativity</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>XP Reward — <span id="h-xp-label">50 XP</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="h-xp" min="10" max="100" step="5" value="50" oninput="document.getElementById('h-xp-label').textContent=this.value+' XP'">
+      </div>
+    </div>
+    <div class="field">
+      <label>XP Penalty — <span id="h-pen-label">20 XP</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="h-pen" min="5" max="50" step="5" value="20" oninput="document.getElementById('h-pen-label').textContent=this.value+' XP'">
+      </div>
+    </div>
+    <div class="field">
+      <label>Difficulty — <span id="h-diff-label">2.0</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="h-diff" min="1" max="5" step="0.5" value="2" oninput="document.getElementById('h-diff-label').textContent=this.value">
+      </div>
+    </div>
+    <div class="field">
+      <label>Frequency</label>
+      <select id="h-freq"><option>Daily</option><option>Weekly</option></select>
+    </div>
+    <div class="field" id="rest-days-field">
+      <label>Rest Days <span style="color:var(--text-dim);font-weight:400">(tap to toggle off)</span></label>
+      <div class="rest-days-wrap" id="rest-days-picker">
+        <span class="day-btn" data-day="0">SUN</span>
+        <span class="day-btn" data-day="1">MON</span>
+        <span class="day-btn" data-day="2">TUE</span>
+        <span class="day-btn" data-day="3">WED</span>
+        <span class="day-btn" data-day="4">THU</span>
+        <span class="day-btn" data-day="5">FRI</span>
+        <span class="day-btn" data-day="6">SAT</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;letter-spacing:1px">GREEN = REST DAY (no penalty)</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal()">CANCEL</button>
+      <button class="btn btn-sm btn-purple" onclick="createHabit()">CREATE HABIT</button>
+    </div>
+  </div>
+
+  <div class="modal" id="name-modal" style="display:none">
+    <div class="modal-title">HUNTER IDENTITY</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="field"><label>Hunter Name</label><input id="name-input" type="text" placeholder="Enter your name..."></div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal()">CANCEL</button>
+      <button class="btn btn-sm btn-gold" onclick="saveName()">CONFIRM</button>
+    </div>
+  </div>
+
+  <!-- EDIT QUEST MODAL -->
+  <div class="modal" id="edit-quest-modal" style="display:none">
+    <div class="modal-title">EDIT QUEST</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <input type="hidden" id="eq-id">
+    <div class="field"><label>Quest Title</label><input id="eq-title" type="text" placeholder="Define your mission..."></div>
+    <div class="field"><label>Description</label><input id="eq-desc" type="text" placeholder="What needs to be done?"></div>
+    <div class="field">
+      <label>Difficulty — <span id="eq-diff-label">1.0 (Easy)</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="eq-diff" min="1" max="3" step="0.5" value="1" oninput="updateEQDiff()">
+        <span class="slider-val" id="eq-diff-val">1.0</span>
+      </div>
+    </div>
+    <div class="xp-preview">XP REWARD: <span id="eq-xp-preview">150</span> XP</div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal()">CANCEL</button>
+      <button class="btn btn-sm btn-gold" onclick="saveEditQuest()">SAVE CHANGES</button>
+    </div>
+  </div>
+
+  <!-- EDIT HABIT MODAL -->
+  <div class="modal" id="edit-habit-modal" style="display:none">
+    <div class="modal-title">EDIT HABIT</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <input type="hidden" id="eh-id">
+    <div class="field"><label>Habit Name</label><input id="eh-name" type="text" placeholder="What will you do daily?"></div>
+    <div class="field">
+      <label>Category</label>
+      <select id="eh-cat">
+        <option>Health</option><option>Productivity</option><option>Learning</option>
+        <option>Finance</option><option>Relationships</option><option>Creativity</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>XP Reward — <span id="eh-xp-label">50 XP</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="eh-xp" min="10" max="100" step="5" value="50" oninput="document.getElementById('eh-xp-label').textContent=this.value+' XP'">
+      </div>
+    </div>
+    <div class="field">
+      <label>XP Penalty — <span id="eh-pen-label">20 XP</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="eh-pen" min="5" max="50" step="5" value="20" oninput="document.getElementById('eh-pen-label').textContent=this.value+' XP'">
+      </div>
+    </div>
+    <div class="field">
+      <label>Difficulty — <span id="eh-diff-label">2.0</span></label>
+      <div class="slider-wrap">
+        <input type="range" id="eh-diff" min="1" max="5" step="0.5" value="2" oninput="document.getElementById('eh-diff-label').textContent=this.value">
+      </div>
+    </div>
+    <div class="field">
+      <label>Frequency</label>
+      <select id="eh-freq"><option>Daily</option><option>Weekly</option></select>
+    </div>
+    <div class="field">
+      <label>Rest Days <span style="color:var(--text-dim);font-weight:400">(tap to toggle off)</span></label>
+      <div class="rest-days-wrap" id="eh-rest-days-picker">
+        <span class="day-btn" data-day="0">SUN</span>
+        <span class="day-btn" data-day="1">MON</span>
+        <span class="day-btn" data-day="2">TUE</span>
+        <span class="day-btn" data-day="3">WED</span>
+        <span class="day-btn" data-day="4">THU</span>
+        <span class="day-btn" data-day="5">FRI</span>
+        <span class="day-btn" data-day="6">SAT</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px;letter-spacing:1px">GREEN = REST DAY (no penalty)</div>
+    </div>
+    <div style="font-size:11px;color:var(--text-dim);padding:8px 0;letter-spacing:1px;border-top:1px solid var(--border);margin-top:4px">
+      ⚠ STREAK DATA IS PRESERVED — only settings are updated
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal()">CANCEL</button>
+      <button class="btn btn-sm btn-purple" onclick="saveEditHabit()">SAVE CHANGES</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEVEL UP OVERLAY -->
+<div id="levelup-overlay">
+  <div id="particles"></div>
+  <div class="overlay-big" id="lu-text">LEVEL UP</div>
+  <div class="overlay-sub" id="lu-sub">LEVEL 1 → LEVEL 2</div>
+  <div class="overlay-sub2">Your power has grown. The hunt continues.</div>
+</div>
+
+<!-- RANK UP OVERLAY -->
+<div id="rankup-overlay">
+  <div class="shockwave"></div>
+  <div class="overlay-big" id="ru-text">RANK ASCENSION</div>
+  <div class="overlay-sub" id="ru-sub">F RANK → E RANK</div>
+  <div class="overlay-sub2">A new tier of existence has been unlocked.</div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+// ============================
+// CONSTANTS
+// ============================
+const BADGE_DEFS = [
+  { id:'first_quest',  name:'First Blood',       icon:'⚔️' },
+  { id:'first_habit',  name:'Creature of Habit', icon:'🔁' },
+  { id:'scholar',      name:'Scholar Awakened',  icon:'📚' },
+  { id:'iron_will',    name:'Iron Will',          icon:'🛡️' },
+  { id:'relentless',   name:'Relentless',         icon:'💀' },
+  { id:'grind',        name:'Grind Never Stops',  icon:'⚙️' },
+  { id:'deep_thinker', name:'Deep Thinker',       icon:'🧠' },
+  { id:'beast_mode',   name:'Beast Mode',         icon:'🔥' },
+  { id:'mind_palace',  name:'Mind Palace',        icon:'🌌' },
+  { id:'unstoppable',  name:'Unstoppable Force',  icon:'💪' },
+  { id:'balanced',     name:'Balanced Hunter',    icon:'⚖️' },
+  { id:'comeback',     name:'From the Ashes',     icon:'🔮' },
+  { id:'habit_master', name:'Habit Master',       icon:'👑' },
+  { id:'centurion',    name:'Centurion',          icon:'🎖️' },
+  { id:'shadow_monarch',name:'Shadow Monarch',    icon:'🌑' },
+  { id:'consistent',   name:'Consistent',         icon:'📅' },
+];
+
+const CAT_ICONS = { Health:'❤️', Productivity:'⚡', Learning:'📖', Finance:'💰', Relationships:'🤝', Creativity:'🎨', Other:'✨' };
+
+const RANK_INFO = [
+  { rank:'S', minLevel:50, color:'#ffd700' },
+  { rank:'A', minLevel:40, color:'#ff4444' },
+  { rank:'B', minLevel:30, color:'#ffaa00' },
+  { rank:'C', minLevel:20, color:'#aa44ff' },
+  { rank:'D', minLevel:10, color:'#44ff88' },
+  { rank:'E', minLevel:5,  color:'#44aaff' },
+  { rank:'F', minLevel:1,  color:'#888888' },
+];
+
+const W_FLAVORS = [
+  "Your muscles tear and rebuild. Each rep carves your legend.",
+  "Pain is the currency of power. You have paid in full.",
+  "A hunter's body is their ultimate weapon. Sharpen it.",
+  "You push beyond your limits. The System takes note.",
+  "Sweat and iron. The foundation of every shadow soldier.",
+  "Every rep is a step toward becoming something inhuman.",
+];
+const S_FLAVORS = [
+  "Knowledge carved into your soul cannot be taken away.",
+  "Each page read rewrites your fate.",
+  "The mind sharpens like a blade on a whetstone.",
+  "Understanding flows through you like mana.",
+  "You have absorbed what others overlook.",
+  "Intelligence is the silent predator's greatest weapon.",
+];
+
+// ============================
+// STATE
+// ============================
+let G = {
+  hunter: { name:'Hunter', totalXP:0, level:1, rank:'F', questStreak:0, lastQuestDate:null, lastActiveDate:null, freezeTokens:0, freezeUsedToday:false },
+  stats: { STR:0, INT:0, END:0, WIL:0, AGI:0 },
+  quests: [],
+  habits: [],
+  habitXPToday: 0,
+  badges: BADGE_DEFS.map(b => ({ id:b.id, earned:false, earnedDate:null })),
+  history: [],
+  deepWorkCount: 0,
+  highIntensityCount: 0,
+  logStreaks: {
+    workout: { currentStreak:0, bestStreak:0, lastLogged:null, loggedToday:false, graceActive:false, totalLogs:0, frozenToday:false },
+    study:   { currentStreak:0, bestStreak:0, lastLogged:null, loggedToday:false, graceActive:false, totalLogs:0, frozenToday:false },
+  },
+  weightLog: [],   // [{ date: 'Mon Jan 01 2025', value: 70.5, unit: 'kg', ts: 1234567890 }]
+  weightUnit: 'kg',
+};
+
+// ============================
+// SAVE / LOAD
+// ============================
+function save() {
+  try { localStorage.setItem('slv2', JSON.stringify(G)); } catch(e){}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem('slv2');
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    G.hunter = {...G.hunter, ...d.hunter};
+    G.stats = {...G.stats, ...(d.stats||{})};
+    G.quests = d.quests || [];
+    G.habits = d.habits || [];
+    G.habitXPToday = d.habitXPToday || 0;
+    G.history = d.history || [];
+    G.deepWorkCount = d.deepWorkCount || 0;
+    G.highIntensityCount = d.highIntensityCount || 0;
+    if(d.logStreaks) {
+      G.logStreaks.workout = {...G.logStreaks.workout, ...d.logStreaks.workout};
+      G.logStreaks.study   = {...G.logStreaks.study,   ...d.logStreaks.study};
+    }
+    G.weightLog  = d.weightLog  || [];
+    G.weightUnit = d.weightUnit || 'kg';
+    G.badges = BADGE_DEFS.map(b => {
+      const f = (d.badges||[]).find(x => x.id === b.id);
+      return f || { id:b.id, earned:false, earnedDate:null };
+    });
+  } catch(e){ console.error(e); }
+}
+
+// ============================
+// DATES & HELPERS
+// ============================
+function todayStr() { return new Date().toDateString(); }
+function yesterdayStr() { const d=new Date(); d.setDate(d.getDate()-1); return d.toDateString(); }
+function todayDOW() { return new Date().getDay(); } // 0=Sun..6=Sat
+function isRestDay(habit) {
+  const restDays = habit.restDays || [];
+  return restDays.includes(todayDOW());
+}
+function wasRestDayOn(habit, dateStr) {
+  const d = new Date(dateStr);
+  return (habit.restDays||[]).includes(d.getDay());
+}
+
+// ============================
+// DAILY RESET
+// ============================
+function dailyReset() {
+  const today = todayStr();
+  if(G.hunter.lastActiveDate === today) return;
+  const hadPrevDay = !!G.hunter.lastActiveDate;
+
+  if(hadPrevDay) {
+    const yest = yesterdayStr();
+
+    // Missed habits
+    G.habits.forEach(h => {
+      if(h.frequency === 'Daily' && !h.completedToday) {
+        // Skip if yesterday was a rest day for this habit
+        if(wasRestDayOn(h, yest)) {
+          // Rest day — no penalty, streak protected
+        }
+        // Skip if habit was frozen yesterday
+        else if(h.frozenToday) {
+          // Freeze used — no penalty, streak holds
+        }
+        // Grace period: already in grace, now expired → penalise
+        else if(h.graceActive) {
+          h.graceActive = false;
+          const pen = Math.min(h.xpPenalty, G.hunter.totalXP);
+          G.hunter.totalXP = Math.max(0, G.hunter.totalXP - pen);
+          h.currentStreak = 0;
+          h.failureCount = (h.failureCount||0) + 1;
+          addHist('neg', `Missed (grace expired): ${h.name}`, pen);
+          toast(`Grace expired: ${h.name}. -${pen} XP`, 'neg');
+        }
+        // First miss — activate grace period (24h buffer)
+        else if(h.lastCompleted !== yest) {
+          h.graceActive = true;
+          toast(`⚠ Grace period: ${h.name}. Complete today to save your streak!`, 'info');
+        }
+      } else if(h.completedToday) {
+        h.graceActive = false; // completed, clear any grace
+      }
+      h.completedToday = false;
+      h.frozenToday = false; // reset freeze each new day
+    });
+
+    // Missed quests — 48h grace (original 24h + 1 day buffer)
+    G.quests.forEach(q => {
+      if(q.status === 'active') {
+        const age = Date.now() - q.generatedAt;
+        if(age > 172800000) {
+          // Past grace period (48h) — penalise
+          q.status = 'missed';
+          const pen = 10 + Math.floor(Math.random()*11);
+          G.hunter.totalXP = Math.max(0, G.hunter.totalXP - pen);
+          G.hunter.questStreak = 0;
+          addHist('neg', `Quest expired: ${q.title}`, pen);
+          toast(`Quest expired: ${q.title}. -${pen} XP`, 'neg');
+          if(Math.random() < 0.25) offerRecovery(q);
+        } else if(age > 86400000 && !q.graceShown) {
+          // In grace window (24–48h)
+          q.graceShown = true;
+          toast(`⚠ Grace period: "${q.title}" — 1 day left before penalty!`, 'info');
+        }
+      }
+    });
+  }
+
+  // Reset freeze used flag each day
+  G.hunter.freezeUsedToday = false;
+  G.habitXPToday = 0;
+
+  // Handle workout / study log streaks
+  if(hadPrevDay) {
+    ['workout','study'].forEach(type => {
+      const ls = G.logStreaks[type];
+      if(!ls.loggedToday) {
+        if(ls.frozenToday) {
+          // Was frozen yesterday — streak protected, no penalty, no grace
+        } else if(ls.graceActive) {
+          // Grace expired
+          ls.graceActive = false;
+          ls.currentStreak = 0;
+          toast(`⚠ ${type === 'workout' ? 'Workout' : 'Study'} streak reset — grace period expired.`, 'neg');
+        } else if(ls.lastLogged && ls.lastLogged !== yesterdayStr()) {
+          // Missed yesterday — activate grace
+          ls.graceActive = true;
+          toast(`⏳ ${type === 'workout' ? 'Workout' : 'Study'} grace period — log today to save your streak!`, 'info');
+        }
+      } else {
+        ls.graceActive = false;
+      }
+      ls.loggedToday = false;
+      ls.frozenToday = false; // reset freeze each new day
+    });
+  }
+
+  G.hunter.lastActiveDate = today;
+  recalc(true);
+  save();
+}
+
+function offerRecovery(orig) {
+  const d = Math.min(3.0, Math.round(orig.difficulty * 1.3 * 2)/2);
+  const xp = Math.round((100 + 50*d) * 1.2);
+  G.quests.push({
+    id: 'r'+Date.now(), title:'⚡ RECOVERY: '+orig.title,
+    description: 'Prove your resilience. The System offers one chance to reclaim your honor.',
+    difficulty: d, xpReward: xp, status:'active',
+    generatedAt: Date.now(), completedAt: null, isRecovery: true,
+  });
+  document.getElementById('recovery-banner').style.display = 'flex';
+  toast('Recovery Quest offered! Complete within 24h.', 'badge');
+}
+
+// ============================
+// XP & LEVELS
+// ============================
+function getRankInfo(level) {
+  for(const r of RANK_INFO) if(level >= r.minLevel) return r;
+  return RANK_INFO[RANK_INFO.length-1];
+}
+function recalc(silent=false) {
+  const old = { level: G.hunter.level, rank: G.hunter.rank };
+  G.hunter.level = Math.floor(G.hunter.totalXP / 1000) + 1;
+  G.hunter.rank = getRankInfo(G.hunter.level).rank;
+  if(!silent) {
+    if(G.hunter.level > old.level) triggerLevelUp(old.level, G.hunter.level);
+    if(G.hunter.rank !== old.rank) triggerRankUp(old.rank, G.hunter.rank);
+  }
+  renderHeader();
+}
+function awardXP(amount, label) {
+  const actual = Math.round(amount);
+  G.hunter.totalXP += actual;
+  addHist('pos', label, actual);
+  recalc();
+  checkBadges();
+  save();
+  setTimeout(()=>drawChart(currentChart), 50);
+  return actual;
+}
+
+// ============================
+// HEADER
+// ============================
+function renderHeader() {
+  const h = G.hunter;
+  document.getElementById('hunter-name').textContent = h.name.toUpperCase();
+  const ri = getRankInfo(h.level);
+  const badge = document.getElementById('rank-badge');
+  badge.textContent = h.rank + ' RANK';
+  badge.style.color = ri.color;
+  badge.style.borderColor = ri.color;
+  badge.style.boxShadow = `0 0 12px ${ri.color}, inset 0 0 12px rgba(255,255,255,0.05)`;
+  badge.style.textShadow = `0 0 8px ${ri.color}`;
+  document.getElementById('xp-level-text').textContent = `LEVEL ${h.level}`;
+  const xpInLevel = h.totalXP % 1000;
+  document.getElementById('xp-count-text').textContent = `${h.totalXP.toLocaleString()} XP  (${xpInLevel}/1000)`;
+  document.getElementById('xp-bar').style.width = (xpInLevel/10)+'%';
+  const ft = h.freezeTokens || 0;
+  document.getElementById('freeze-count').textContent = ft;
+  document.getElementById('freeze-btn').disabled = ft <= 0 || h.freezeUsedToday;
+  renderStats();
+}
+function renderStats() {
+  ['STR','INT','END','WIL','AGI'].forEach(s => {
+    const v = G.stats[s];
+    document.getElementById('stat-'+s).textContent = v;
+    document.getElementById('bar-'+s).style.width = (v/(v+50)*100)+'%';
+  });
+}
+
+// ============================
+// HISTORY
+// ============================
+function addHist(delta, label, xp) {
+  G.history.unshift({ delta, label, xp, ts: Date.now() });
+  if(G.history.length > 50) G.history.pop();
+  renderHistory();
+}
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  const em = document.getElementById('history-empty');
+  if(!G.history.length) { el.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  el.innerHTML = G.history.map(h => {
+    const d = new Date(h.ts);
+    const t = d.toLocaleDateString('en-IN',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    return `<div class="history-item ${h.delta}">
+      <span class="history-label">${h.label}</span>
+      <span class="history-xp ${h.delta}">${h.delta==='+'?'+':'-'}${h.xp} XP</span>
+      <span class="history-time">${t}</span>
+    </div>`;
+  }).join('');
+}
+
+// ============================
+// QUESTS
+// ============================
+function renderQuests() {
+  const grid = document.getElementById('quest-grid');
+  const em = document.getElementById('quest-empty');
+  const active = G.quests.filter(q => q.status==='active');
+  if(!active.length) { grid.innerHTML=''; em.style.display='block'; } else { em.style.display='none'; }
+  const hasRecovery = active.some(q=>q.isRecovery);
+  document.getElementById('recovery-banner').style.display = hasRecovery ? 'flex' : 'none';
+  grid.innerHTML = active.map(q => {
+    const age = Date.now() - q.generatedAt;
+    const inGrace = age > 86400000 && age <= 172800000;
+    const rem = Math.max(0, (inGrace ? 172800000 : 86400000) - age);
+    const hrs = Math.floor(rem/3600000), mins = Math.floor((rem%3600000)/60000);
+    const urgent = hrs < 3;
+    const d = q.difficulty;
+    const diffMap = {1:'diff-easy',1.5:'diff-moderate',2:'diff-chall',2.5:'diff-hard',3:'diff-extreme'};
+    const nameMap = {1:'EASY',1.5:'MODERATE',2:'CHALLENGING',2.5:'HARD',3:'EXTREME'};
+    const dc = diffMap[d] || 'diff-extreme';
+    const dl = `${d} ${nameMap[d] || 'EXTREME'}`;
+    return `<div class="quest-card${q.isRecovery?' recovery':''}">
+      <div class="quest-top"><div class="quest-title">${q.title}</div><div class="diff-badge ${dc}">${dl}</div></div>
+      <div class="quest-desc">${q.description||'Complete this mission to earn your reward.'}</div>
+      <div class="quest-footer">
+        <div class="quest-xp">⚡ ${q.xpReward} XP</div>
+        <div class="quest-timer${urgent?' urgent':''}">${hrs}h ${mins}m${inGrace?' left (grace)':' left'}</div>
+      </div>
+      ${inGrace ? '<div class="quest-grace">⏳ GRACE PERIOD — Complete before penalty hits</div>' : ''}
+      <div class="quest-actions">
+        <button class="btn btn-sm btn-green" onclick="completeQuest('${q.id}')">COMPLETE</button>
+        <button class="btn btn-sm btn-blue" onclick="openEditQuestModal('${q.id}')">EDIT</button>
+        <button class="btn btn-sm btn-red" onclick="deleteQuest('${q.id}')">ABANDON</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openQuestModal() {
+  document.getElementById('q-title').value='';
+  document.getElementById('q-desc').value='';
+  document.getElementById('q-diff').value=1;
+  updateQDiff();
+  showModal('quest-modal');
+}
+function updateQDiff() {
+  const v = parseFloat(document.getElementById('q-diff').value);
+  const labels={1:'Easy',1.5:'Moderate',2:'Challenging',2.5:'Hard',3:'Extreme'};
+  document.getElementById('q-diff-label').textContent=`${v} (${labels[v]||'Hard'})`;
+  document.getElementById('q-diff-val').textContent=v;
+  document.getElementById('q-xp-preview').textContent=100+(50*v);
+}
+function createQuest() {
+  const t=document.getElementById('q-title').value.trim();
+  if(!t){toast('Quest needs a title!','neg');return;}
+  const d=parseFloat(document.getElementById('q-diff').value);
+  G.quests.push({id:'q'+Date.now(),title:t,description:document.getElementById('q-desc').value.trim(),
+    difficulty:d,xpReward:100+(50*d),status:'active',generatedAt:Date.now(),completedAt:null,isRecovery:false});
+  save(); closeModal(); renderQuests();
+}
+function completeQuest(id) {
+  const q=G.quests.find(x=>x.id===id);
+  if(!q) return;
+  q.status='completed'; q.completedAt=Date.now();
+  const today=todayStr();
+  if(G.hunter.lastQuestDate!==today) { G.hunter.questStreak++; G.hunter.lastQuestDate=today; }
+  const earned=awardXP(q.xpReward,`Quest: ${q.title}`);
+  if(q.isRecovery) checkBadge('comeback');
+  toast(`Quest Complete! +${earned} XP`,'pos');
+  showFlavor('w-flavor',"A hunter's resolve becomes steel. Mission accomplished.");
+  renderQuests(); checkBadges(); save(); updateBell();
+}
+function deleteQuest(id) { G.quests=G.quests.filter(q=>q.id!==id); save(); renderQuests(); }
+
+// ============================
+// HABITS
+// ============================
+function renderHabits() {
+  const grid=document.getElementById('habit-grid');
+  const em=document.getElementById('habit-empty');
+  if(!G.habits.length) { grid.innerHTML=''; em.style.display='block'; return; }
+  em.style.display='none';
+  const todayDow = todayDOW();
+  grid.innerHTML=G.habits.map(h=>{
+    const icon=CAT_ICONS[h.category]||'✨';
+    const restToday = (h.restDays||[]).includes(todayDow);
+    const inGrace = !!h.graceActive;
+    const frozenStreak = !!h.frozenToday;
+    let statusBlock;
+    if(h.completedToday) {
+      statusBlock = '<div class="habit-done-mark">✓ DONE TODAY</div>';
+    } else if(restToday) {
+      statusBlock = '<div class="habit-done-mark" style="color:var(--blue);border-color:rgba(0,212,255,0.3)">😴 REST DAY</div>';
+    } else if(frozenStreak) {
+      statusBlock = '<div class="habit-done-mark" style="color:var(--blue);border-color:rgba(0,212,255,0.3)">🧊 FROZEN</div>';
+    } else {
+      statusBlock = `<button class="btn btn-sm btn-green" style="width:100%" onclick="completeHabit('${h.id}')">MARK COMPLETE</button>`;
+    }
+    const restDayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const restLabel = (h.restDays||[]).length ? `🏖 ${(h.restDays).map(d=>restDayNames[d]).join(', ')}` : '';
+    return `<div class="habit-card${h.completedToday?' done':''}${restToday?' done':''}">
+      <button class="edit-btn" onclick="openEditHabitModal('${h.id}')">✏</button>
+      <button class="delete-btn" onclick="deleteHabit('${h.id}')">✕</button>
+      <div class="habit-top"><div class="habit-name">${h.name}</div><div class="habit-cat">${icon}</div></div>
+      <div class="habit-streak">🔥 ${h.currentStreak}</div>
+      <div class="habit-streak-label">DAY STREAK</div>
+      <div class="habit-meta">
+        <span class="habit-xp-tag">+${h.xpReward} XP</span>
+        <span class="habit-penalty-tag">-${h.xpPenalty} XP</span>
+        <span class="habit-diff-tag">⚡${h.difficulty}</span>
+        ${inGrace?'<span class="habit-grace-tag">⏳ GRACE</span>':''}
+        ${frozenStreak?'<span class="habit-rest-tag">🧊 FROZEN</span>':''}
+      </div>
+      ${statusBlock}
+      <div class="habit-best">BEST: ${h.bestStreak} days${restLabel?' · '+restLabel:''}</div>
+    </div>`;
+  }).join('');
+  const pct=Math.min(100,G.habitXPToday);
+  document.getElementById('habit-daily-bar').style.width=pct+'%';
+  document.getElementById('habit-xp-count').textContent=`${G.habitXPToday} / 100 XP`;
+}
+function openHabitModal() {
+  document.getElementById('h-name').value='';
+  // Clear rest day selection
+  document.querySelectorAll('#rest-days-picker .day-btn').forEach(b=>b.classList.remove('rest'));
+  showModal('habit-modal');
+}
+// Rest day toggle
+document.getElementById('rest-days-picker').addEventListener('click', e => {
+  const btn = e.target.closest('.day-btn');
+  if(btn) btn.classList.toggle('rest');
+});
+function createHabit() {
+  const n=document.getElementById('h-name').value.trim();
+  if(!n){toast('Habit needs a name!','neg');return;}
+  const restDays = [];
+  document.querySelectorAll('#rest-days-picker .day-btn.rest').forEach(b=>restDays.push(parseInt(b.dataset.day)));
+  G.habits.push({id:'h'+Date.now(),name:n,category:document.getElementById('h-cat').value,
+    frequency:document.getElementById('h-freq').value,
+    xpReward:parseInt(document.getElementById('h-xp').value),
+    xpPenalty:parseInt(document.getElementById('h-pen').value),
+    difficulty:parseFloat(document.getElementById('h-diff').value),
+    restDays,
+    currentStreak:0,bestStreak:0,totalCompletions:0,failureCount:0,
+    lastCompleted:null,completedToday:false,graceActive:false,frozenToday:false});
+  checkBadge('first_habit'); save(); closeModal(); renderHabits();
+}
+function completeHabit(id) {
+  const h=G.habits.find(x=>x.id===id);
+  if(!h||h.completedToday) return;
+  const cap=100-G.habitXPToday;
+  if(cap<=0){toast('Daily habit XP cap reached (100 XP)!','info');return;}
+  let xp=Math.min(h.xpReward,cap);
+  h.completedToday=true; h.currentStreak++; h.totalCompletions++;
+  h.lastCompleted=todayStr();
+  if(h.currentStreak>h.bestStreak) h.bestStreak=h.currentStreak;
+  G.habitXPToday+=xp;
+  if(h.currentStreak%7===0) {
+    const bonus=Math.min(5,100-G.habitXPToday);
+    G.habitXPToday+=bonus; xp+=bonus;
+    // Also award a freeze token every 7-day milestone
+    G.hunter.freezeTokens = (G.hunter.freezeTokens||0) + 1;
+    toast(`🔥 ${h.currentStreak}-Day Streak! +5 XP & 🧊 +1 Freeze Token!`,'badge');
+  }
+  awardXP(xp,`Habit: ${h.name}`);
+  toast(`Habit Complete! +${xp} XP`,'pos');
+  checkBadges(); save(); renderHabits(); updateBell();
+}
+function deleteHabit(id) { G.habits=G.habits.filter(h=>h.id!==id); save(); renderHabits(); }
+
+// ============================
+// EDIT QUEST
+// ============================
+function openEditQuestModal(id) {
+  const q = G.quests.find(x=>x.id===id);
+  if(!q) return;
+  document.getElementById('eq-id').value = q.id;
+  document.getElementById('eq-title').value = q.title;
+  document.getElementById('eq-desc').value = q.description || '';
+  document.getElementById('eq-diff').value = q.difficulty;
+  updateEQDiff();
+  showModal('edit-quest-modal');
+}
+function updateEQDiff() {
+  const v = parseFloat(document.getElementById('eq-diff').value);
+  const labels={1:'Easy',1.5:'Moderate',2:'Challenging',2.5:'Hard',3:'Extreme'};
+  document.getElementById('eq-diff-label').textContent=`${v} (${labels[v]||'Hard'})`;
+  document.getElementById('eq-diff-val').textContent=v;
+  document.getElementById('eq-xp-preview').textContent=100+(50*v);
+}
+function saveEditQuest() {
+  const id = document.getElementById('eq-id').value;
+  const q = G.quests.find(x=>x.id===id);
+  if(!q) return;
+  const t = document.getElementById('eq-title').value.trim();
+  if(!t){toast('Quest needs a title!','neg');return;}
+  const d = parseFloat(document.getElementById('eq-diff').value);
+  q.title = t;
+  q.description = document.getElementById('eq-desc').value.trim();
+  q.difficulty = d;
+  q.xpReward = 100 + (50*d);
+  save(); closeModal(); renderQuests();
+  toast('Quest updated!','pos');
+}
+
+// ============================
+// EDIT HABIT
+// ============================
+function openEditHabitModal(id) {
+  const h = G.habits.find(x=>x.id===id);
+  if(!h) return;
+  document.getElementById('eh-id').value = h.id;
+  document.getElementById('eh-name').value = h.name;
+  document.getElementById('eh-cat').value = h.category;
+  document.getElementById('eh-xp').value = h.xpReward;
+  document.getElementById('eh-xp-label').textContent = h.xpReward + ' XP';
+  document.getElementById('eh-pen').value = h.xpPenalty;
+  document.getElementById('eh-pen-label').textContent = h.xpPenalty + ' XP';
+  document.getElementById('eh-diff').value = h.difficulty;
+  document.getElementById('eh-diff-label').textContent = h.difficulty;
+  document.getElementById('eh-freq').value = h.frequency;
+  // Restore rest days
+  document.querySelectorAll('#eh-rest-days-picker .day-btn').forEach(b => {
+    b.classList.toggle('rest', (h.restDays||[]).includes(parseInt(b.dataset.day)));
+  });
+  showModal('edit-habit-modal');
+}
+document.getElementById('eh-rest-days-picker').addEventListener('click', e => {
+  const btn = e.target.closest('.day-btn');
+  if(btn) btn.classList.toggle('rest');
+});
+function saveEditHabit() {
+  const id = document.getElementById('eh-id').value;
+  const h = G.habits.find(x=>x.id===id);
+  if(!h) return;
+  const n = document.getElementById('eh-name').value.trim();
+  if(!n){toast('Habit needs a name!','neg');return;}
+  const restDays = [];
+  document.querySelectorAll('#eh-rest-days-picker .day-btn.rest').forEach(b=>restDays.push(parseInt(b.dataset.day)));
+  // Only update settings — preserve ALL streak/progress data
+  h.name       = n;
+  h.category   = document.getElementById('eh-cat').value;
+  h.xpReward   = parseInt(document.getElementById('eh-xp').value);
+  h.xpPenalty  = parseInt(document.getElementById('eh-pen').value);
+  h.difficulty = parseFloat(document.getElementById('eh-diff').value);
+  h.frequency  = document.getElementById('eh-freq').value;
+  h.restDays   = restDays;
+  save(); closeModal(); renderHabits();
+  toast('Habit updated! Streak data preserved.','pos');
+}
+
+// ============================
+// STREAK FREEZE
+// ============================
+function useFreeze() {
+  if((G.hunter.freezeTokens||0) <= 0) { toast('No freeze tokens available!','neg'); return; }
+  if(G.hunter.freezeUsedToday) { toast('Freeze already used today!','neg'); return; }
+
+  // Freeze workout & study log streaks only (habits use grace period)
+  let logsFrozen = [];
+  ['workout','study'].forEach(type => {
+    const ls = G.logStreaks[type];
+    if(!ls.loggedToday) {
+      ls.frozenToday = true;
+      logsFrozen.push(type);
+    }
+  });
+
+  G.hunter.freezeUsedToday = true;
+  G.hunter.freezeTokens--;
+
+  const logLabel = logsFrozen.length
+    ? logsFrozen.map(t => t.charAt(0).toUpperCase()+t.slice(1)).join(' & ') + ' log streak protected'
+    : 'Already logged both today — tokens saved but nothing to freeze';
+  addHist('pos', `🧊 Streak Freeze used — ${logLabel}`, 0);
+  toast(`🧊 Freeze activated! ${logLabel}.`, 'badge');
+  save(); renderHeader(); renderLogStreaks(); updateBell();
+}
+
+// ============================
+// LOG STREAK RENDERING
+// ============================
+function renderLogStreaks() {
+  ['workout','study'].forEach(type => {
+    const ls = G.logStreaks[type];
+    const prefix = type === 'workout' ? 'w' : 's';
+    const card = document.getElementById(`lsc-${type}`);
+    document.getElementById(`lsc-${prefix}-streak`).innerHTML =
+      `${ls.currentStreak} <span>days</span>`;
+    document.getElementById(`lsc-${prefix}-meta`).textContent =
+      `Best: ${ls.bestStreak} · Total: ${ls.totalLogs} logs`;
+    const badge = document.getElementById(`lsc-${prefix}-badge`);
+    card.classList.remove('active','grace');
+    if(ls.loggedToday) {
+      badge.textContent = '✓ DONE'; badge.className = 'lsc-badge lsc-done';
+      card.classList.add('active');
+    } else if(ls.frozenToday) {
+      badge.textContent = '🧊 FROZEN'; badge.className = 'lsc-badge lsc-done';
+      card.classList.add('active');
+    } else if(ls.graceActive) {
+      badge.textContent = '⏳ GRACE'; badge.className = 'lsc-badge lsc-grace';
+      card.classList.add('grace');
+    } else {
+      badge.textContent = 'TODAY'; badge.className = 'lsc-badge lsc-pending';
+    }
+  });
+}
+
+function tickLogStreak(type) {
+  const ls = G.logStreaks[type];
+  ls.totalLogs++; // always increment on every log
+  if(ls.loggedToday) return; // streak already ticked today
+  ls.loggedToday = true;
+  if(ls.lastLogged === yesterdayStr() || ls.graceActive) {
+    ls.currentStreak++;
+    ls.graceActive = false;
+  } else if(!ls.lastLogged) {
+    ls.currentStreak = 1;
+  } else {
+    ls.currentStreak = 1;
+  }
+  if(ls.currentStreak > ls.bestStreak) ls.bestStreak = ls.currentStreak;
+  ls.lastLogged = todayStr();
+  if(ls.currentStreak > 0 && ls.currentStreak % 7 === 0) {
+    toast(`🔥 ${ls.currentStreak}-Day ${type === 'workout' ? 'Workout' : 'Study'} Streak!`, 'badge');
+  }
+}
+
+// ============================
+// QUICK LOG
+// ============================
+function logWorkout() {
+  const act=document.getElementById('w-activity').value.trim();
+  const dur=parseInt(document.getElementById('w-duration').value);
+  if(!act||!dur||dur<1){toast('Fill in activity and duration!','neg');return;}
+  const mult={Low:1,Med:1.5,High:2};
+  const intensity=getRadio('w-intensity');
+  const stat=getRadio('w-stat');
+  const xp=Math.max(10,Math.floor(dur*mult[intensity]));
+  G.stats[stat]++;
+  if(intensity==='High') G.highIntensityCount++;
+  tickLogStreak('workout');
+  awardXP(xp,`Workout: ${act} (${dur}min, ${intensity})`);
+  document.getElementById('w-activity').value='';
+  document.getElementById('w-duration').value='';
+  showFlavor('w-flavor',W_FLAVORS[Math.floor(Math.random()*W_FLAVORS.length)]);
+  toast(`+${xp} XP | ${stat} +1 | 🔥 ${G.logStreaks.workout.currentStreak}d streak`,'pos');
+  checkBadges(); save(); renderStats(); renderLogStreaks(); updateBell();
+}
+function logStudy() {
+  const sub=document.getElementById('s-subject').value.trim();
+  const dur=parseInt(document.getElementById('s-duration').value);
+  if(!sub||!dur||dur<1){toast('Fill in subject and duration!','neg');return;}
+  const mult={Distracted:1,Focused:1.5,Deep:2};
+  const focus=getRadio('s-focus');
+  const stat=getRadio('s-stat');
+  const xp=Math.max(10,Math.floor(dur*mult[focus]));
+  G.stats[stat]++;
+  if(focus==='Deep') G.deepWorkCount++;
+  tickLogStreak('study');
+  awardXP(xp,`Study: ${sub} (${dur}min, ${focus})`);
+  document.getElementById('s-subject').value='';
+  document.getElementById('s-duration').value='';
+  showFlavor('s-flavor',S_FLAVORS[Math.floor(Math.random()*S_FLAVORS.length)]);
+  toast(`+${xp} XP | ${stat} +1 | 🔥 ${G.logStreaks.study.currentStreak}d streak`,'pos');
+  checkBadge('scholar'); checkBadges(); save(); renderStats(); renderLogStreaks(); updateBell();
+}
+function getRadio(gid) {
+  const btns=document.querySelectorAll(`#${gid} .radio-btn`);
+  for(const b of btns) if(b.classList.contains('active')) return b.dataset.val;
+  return btns[0]?.dataset.val;
+}
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.radio-btn');
+  if(!btn) return;
+  const group = btn.closest('.radio-group');
+  if(!group) return;
+  group.querySelectorAll('.radio-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+});
+
+// ============================
+// BADGES
+// ============================
+function checkBadge(id) {
+  const b=G.badges.find(x=>x.id===id);
+  if(!b||b.earned) return false;
+  b.earned=true; b.earnedDate=new Date().toLocaleDateString();
+  const def=BADGE_DEFS.find(x=>x.id===id);
+  toast(`🏆 BADGE UNLOCKED: ${def.name}`,'badge');
+  renderBadges(); save(); return true;
+}
+function checkBadges() {
+  const h=G.hunter, s=G.stats;
+  const qCompleted=G.quests.filter(q=>q.status==='completed').length;
+  const hCompletions=G.habits.reduce((a,h)=>a+h.totalCompletions,0);
+  if(qCompleted>=1) checkBadge('first_quest');
+  if(G.habits.length>=1) checkBadge('first_habit');
+  if(h.questStreak>=7) checkBadge('iron_will');
+  if(h.questStreak>=30) checkBadge('relentless');
+  if(qCompleted+hCompletions>=50) checkBadge('grind');
+  if(G.deepWorkCount>=10) checkBadge('deep_thinker');
+  if(G.highIntensityCount>=10) checkBadge('beast_mode');
+  if(s.INT>=50) checkBadge('mind_palace');
+  if(s.STR>=50) checkBadge('unstoppable');
+  if(Object.values(s).every(v=>v>=20)) checkBadge('balanced');
+  if(G.habits.some(h=>h.bestStreak>=30)) checkBadge('habit_master');
+  if(G.habits.some(h=>h.currentStreak>=7)) checkBadge('consistent');
+  if(h.level>=10) checkBadge('centurion');
+  if(h.rank==='S') checkBadge('shadow_monarch');
+}
+function renderBadges() {
+  document.getElementById('badge-grid').innerHTML=BADGE_DEFS.map(def=>{
+    const b=G.badges.find(x=>x.id===def.id);
+    const earned=b&&b.earned;
+    return `<div class="badge-card ${earned?'unlocked':'locked'}" title="${def.id}">
+      ${earned?`<span class="badge-icon">${def.icon}</span>`:`<span class="badge-icon" style="filter:grayscale(1)">❓</span>`}
+      <div class="badge-name">${earned?def.name:'???'}</div>
+      ${earned&&b.earnedDate?`<div class="badge-date">${b.earnedDate}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ============================
+// OVERLAYS
+// ============================
+function triggerLevelUp(from, to) {
+  document.getElementById('lu-sub').textContent=`LEVEL ${from} → LEVEL ${to}`;
+  const ov=document.getElementById('levelup-overlay');
+  ov.classList.add('show');
+  spawnParticles();
+  setTimeout(()=>ov.classList.remove('show'),3000);
+}
+function triggerRankUp(from, to) {
+  document.getElementById('ru-sub').textContent=`${from} RANK → ${to} RANK`;
+  const ov=document.getElementById('rankup-overlay');
+  ov.classList.add('show');
+  setTimeout(()=>ov.classList.remove('show'),4000);
+}
+function spawnParticles() {
+  const c=document.getElementById('particles');
+  c.innerHTML='';
+  const cols=['#ffd700','#00d4ff','#7b2fff','#ff3366','#00ff9d'];
+  for(let i=0;i<32;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const a=Math.random()*Math.PI*2, dist=120+Math.random()*280;
+    p.style.cssText=`left:50%;top:50%;background:${cols[i%cols.length]};--dx:${Math.cos(a)*dist}px;--dy:${Math.sin(a)*dist}px;animation-delay:${Math.random()*0.3}s;animation-duration:${0.8+Math.random()*0.5}s;`;
+    c.appendChild(p);
+  }
+}
+
+// ============================
+// TOAST
+// ============================
+function toast(msg, type='info') {
+  const el=document.createElement('div');
+  el.className=`toast t-${type}`;
+  el.textContent=msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(),3100);
+}
+
+// ============================
+// FLAVOR
+// ============================
+function showFlavor(id, text) {
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.textContent=text;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ============================
+// MODAL
+// ============================
+function showModal(id) {
+  document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+  document.getElementById(id).style.display='block';
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+document.getElementById('modal-overlay').addEventListener('click', e=>{
+  if(e.target===document.getElementById('modal-overlay')) closeModal();
+});
+
+// ============================
+// NAME
+// ============================
+document.getElementById('hunter-name').addEventListener('click', ()=>{
+  document.getElementById('name-input').value=G.hunter.name;
+  showModal('name-modal');
+  setTimeout(()=>document.getElementById('name-input').focus(),100);
+});
+function saveName() {
+  const v=document.getElementById('name-input').value.trim();
+  if(v){G.hunter.name=v;renderHeader();save();}
+  closeModal();
+}
+document.getElementById('name-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveName();});
+
+// ============================
+// THEME TOGGLE
+// ============================
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('theme-toggle').textContent = isLight ? '🌙 DARK' : '☀ LIGHT';
+  localStorage.setItem('sl_theme', isLight ? 'light' : 'dark');
+  drawChart(currentChart);
+}
+function loadTheme() {
+  if(localStorage.getItem('sl_theme') === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('theme-toggle').textContent = '🌙 DARK';
+  }
+}
+
+// ============================
+// EXPORT / IMPORT JSON
+// ============================
+function exportJSON() {
+  const data = JSON.stringify(G, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `hunter-save-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Save exported! hunter-save-*.json downloaded.', 'pos');
+}
+function importJSON(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      // Validate basic structure
+      if(!parsed.hunter || !parsed.stats) { toast('Invalid save file!', 'neg'); return; }
+      G.hunter = {...G.hunter, ...parsed.hunter};
+      G.stats = {...G.stats, ...(parsed.stats||{})};
+      G.quests = parsed.quests || [];
+      G.habits = parsed.habits || [];
+      G.habitXPToday = parsed.habitXPToday || 0;
+      G.history = parsed.history || [];
+      G.deepWorkCount = parsed.deepWorkCount || 0;
+      G.highIntensityCount = parsed.highIntensityCount || 0;
+      G.badges = BADGE_DEFS.map(b => {
+        const f = (parsed.badges||[]).find(x=>x.id===b.id);
+        return f || { id:b.id, earned:false, earnedDate:null };
+      });
+      save();
+      renderHeader(); renderQuests(); renderHabits(); renderBadges(); renderHistory();
+      drawChart(currentChart);
+      toast(`Save imported! Welcome back, ${G.hunter.name}.`, 'badge');
+    } catch(err) { toast('Failed to read file. Is it a valid JSON save?', 'neg'); }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // reset so same file can be re-imported
+}
+
+// ============================
+// CHART
+// ============================
+let currentChart = 'xp';
+function switchChart(type) {
+  currentChart = type;
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.toggle('active', t.dataset.chart === type));
+  drawChart(type);
+}
+
+function getCSS(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function drawChart(type) {
+  const canvas = document.getElementById('chart-canvas');
+  const wrap = document.getElementById('chart-canvas-wrap');
+  canvas.width = wrap.clientWidth || 600;
+  canvas.height = 200;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const light = document.body.classList.contains('light');
+  const textDim = light ? '#7a86a8' : '#6a7a94';
+  const gridLine = light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)';
+  const blue = light ? '#0077bb' : '#00d4ff';
+  const purple = light ? '#6600dd' : '#7b2fff';
+  const gold = light ? '#aa7700' : '#ffd700';
+  const green = light ? '#007744' : '#00ff9d';
+  const red = light ? '#cc1144' : '#ff3366';
+  const W = canvas.width, H = canvas.height;
+
+  if(type === 'xp') {
+    // XP over last 20 history entries (reversed = oldest first)
+    const entries = [...G.history].reverse().slice(-20);
+    if(entries.length < 2) {
+      drawEmpty(ctx, W, H, textDim, 'Log activities to see XP history'); return;
+    }
+    // Accumulate XP deltas from history relative to current
+    let running = G.hunter.totalXP;
+    const points = [];
+    const rev = [...G.history].slice(0,20);
+    rev.forEach(h => {
+      points.unshift(running);
+      running += h.delta === '+' ? -h.xp : h.xp;
+    });
+    points.push(G.hunter.totalXP); // ensure last point = current
+    const vals = points.slice(0, entries.length+1);
+    drawLineChart(ctx, W, H, vals, blue, purple, textDim, gridLine, 'Total XP', entries.map(e => {
+      const d = new Date(e.ts); return `${d.getMonth()+1}/${d.getDate()}`;
+    }));
+  }
+
+  else if(type === 'stats') {
+    drawRadar(ctx, W, H, G.stats, textDim, gridLine, blue, purple, gold, green, red);
+  }
+
+  else if(type === 'habits') {
+    const habits = G.habits.slice(0,8);
+    if(!habits.length) { drawEmpty(ctx, W, H, textDim, 'Add habits to see streak chart'); return; }
+    drawBarChart(ctx, W, H, habits, gold, purple, textDim, gridLine);
+  }
+}
+
+function drawEmpty(ctx, W, H, color, msg) {
+  ctx.fillStyle = color;
+  ctx.font = '13px Rajdhani, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(msg, W/2, H/2);
+}
+
+function drawLineChart(ctx, W, H, vals, color, color2, textDim, gridLine, label, labels) {
+  const pad = { t:16, r:16, b:32, l:50 };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = max - min || 1;
+  const xStep = cw / (vals.length - 1);
+
+  // Grid
+  for(let i=0;i<=4;i++) {
+    const y = pad.t + ch - (ch/4)*i;
+    ctx.strokeStyle = gridLine; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cw, y); ctx.stroke();
+    ctx.fillStyle = textDim; ctx.font = '10px Rajdhani,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round(min + range/4*i), pad.l-6, y+4);
+  }
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t+ch);
+  grad.addColorStop(0, color.replace(')', ',0.3)').replace('rgb','rgba'));
+  grad.addColorStop(1, 'transparent');
+  ctx.beginPath();
+  vals.forEach((v,i) => {
+    const x = pad.l + i*xStep, y = pad.t + ch - (v-min)/range*ch;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.lineTo(pad.l+cw, pad.t+ch); ctx.lineTo(pad.l, pad.t+ch); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  vals.forEach((v,i) => {
+    const x = pad.l + i*xStep, y = pad.t + ch - (v-min)/range*ch;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Dots + labels
+  const step = Math.max(1, Math.floor(labels.length/6));
+  vals.forEach((v,i) => {
+    const x = pad.l + i*xStep, y = pad.t + ch - (v-min)/range*ch;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+    ctx.fillStyle = color; ctx.fill();
+    if(i % step === 0 && labels[i]) {
+      ctx.fillStyle = textDim; ctx.font = '9px Rajdhani,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(labels[i], x, H-8);
+    }
+  });
+}
+
+function drawRadar(ctx, W, H, stats, textDim, gridLine, c1, c2, c3, c4, c5) {
+  const keys = ['STR','INT','END','WIL','AGI'];
+  const colors = [c5, c1, c4, c2, c3];
+  const vals = keys.map(k => stats[k] || 0);
+  const maxVal = Math.max(...vals, 30);
+  const cx = W/2, cy = H/2 - 6, r = Math.min(W,H)*0.36;
+  const angles = keys.map((_,i) => (i/keys.length)*Math.PI*2 - Math.PI/2);
+
+  // Grid rings
+  [0.25,0.5,0.75,1].forEach(f => {
+    ctx.beginPath();
+    angles.forEach((a,i) => {
+      const x = cx + Math.cos(a)*r*f, y = cy + Math.sin(a)*r*f;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    });
+    ctx.closePath(); ctx.strokeStyle = gridLine; ctx.lineWidth = 1; ctx.stroke();
+  });
+
+  // Axis lines
+  angles.forEach(a => {
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(a)*r, cy+Math.sin(a)*r);
+    ctx.strokeStyle = gridLine; ctx.lineWidth = 1; ctx.stroke();
+  });
+
+  // Data polygon
+  ctx.beginPath();
+  angles.forEach((a,i) => {
+    const pct = Math.min(vals[i]/maxVal, 1);
+    const x = cx + Math.cos(a)*r*pct, y = cy + Math.sin(a)*r*pct;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  const grd = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  grd.addColorStop(0, 'rgba(123,47,255,0.4)'); grd.addColorStop(1, 'rgba(0,212,255,0.1)');
+  ctx.fillStyle = grd; ctx.fill();
+  ctx.strokeStyle = c1; ctx.lineWidth = 2; ctx.stroke();
+
+  // Dots & labels
+  angles.forEach((a,i) => {
+    const pct = Math.min(vals[i]/maxVal, 1);
+    const x = cx + Math.cos(a)*r*pct, y = cy + Math.sin(a)*r*pct;
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle = colors[i]; ctx.fill();
+    const lx = cx + Math.cos(a)*(r+20), ly = cy + Math.sin(a)*(r+20);
+    ctx.fillStyle = colors[i]; ctx.font = 'bold 12px Rajdhani,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(`${keys[i]} ${vals[i]}`, lx, ly+4);
+  });
+}
+
+function drawBarChart(ctx, W, H, habits, barColor, accentColor, textDim, gridLine) {
+  const pad = { t:16, r:16, b:40, l:10 };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+  const maxStreak = Math.max(...habits.map(h=>h.bestStreak), ...habits.map(h=>h.currentStreak), 1);
+  const bw = (cw / habits.length) * 0.6;
+  const gap = cw / habits.length;
+
+  // Grid
+  for(let i=0;i<=4;i++) {
+    const y = pad.t + ch - (ch/4)*i;
+    ctx.strokeStyle = gridLine; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+  }
+
+  habits.forEach((h,i) => {
+    const x = pad.l + i*gap + gap/2 - bw/2;
+    // Best streak (background bar)
+    const bestH = (h.bestStreak/maxStreak)*ch;
+    ctx.fillStyle = 'rgba(123,47,255,0.2)';
+    ctx.fillRect(x, pad.t+ch-bestH, bw, bestH);
+    // Current streak (foreground bar)
+    const curH = (h.currentStreak/maxStreak)*ch;
+    const grad = ctx.createLinearGradient(0, pad.t+ch-curH, 0, pad.t+ch);
+    grad.addColorStop(0, barColor); grad.addColorStop(1, accentColor);
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, pad.t+ch-curH, bw, curH);
+    // Habit name
+    ctx.fillStyle = textDim; ctx.font = '10px Rajdhani,sans-serif'; ctx.textAlign = 'center';
+    const name = h.name.length > 8 ? h.name.slice(0,7)+'…' : h.name;
+    ctx.fillText(name, x+bw/2, H-22);
+    ctx.fillText(`🔥${h.currentStreak}`, x+bw/2, H-10);
+  });
+
+  // Legend
+  ctx.fillStyle = 'rgba(123,47,255,0.5)'; ctx.fillRect(W-90, 6, 10, 10);
+  ctx.fillStyle = textDim; ctx.font = '10px Rajdhani,sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('Best', W-76, 15);
+  ctx.fillStyle = barColor; ctx.fillRect(W-90, 20, 10, 10);
+  ctx.fillText('Current', W-76, 29);
+}
+
+
+
+
+// ============================
+// NOTIFICATION / BELL SYSTEM
+// ============================
+let notifPanelOpen = false;
+
+function toggleNotifPanel() {
+  notifPanelOpen = !notifPanelOpen;
+  document.getElementById('notif-panel').classList.toggle('open', notifPanelOpen);
+  if(notifPanelOpen) buildNotifList();
+}
+
+// Close panel when clicking outside
+document.addEventListener('click', e => {
+  if(notifPanelOpen && !document.getElementById('bell-wrap').contains(e.target)) {
+    notifPanelOpen = false;
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+});
+
+function buildNotifList() {
+  const list = document.getElementById('notif-list');
+  const items = getNotifItems();
+  if(!items.length) {
+    list.innerHTML = '<div class="notif-empty">✓ All clear, Hunter.<br>No pending quests or habits.</div>';
+    return;
+  }
+  list.innerHTML = items.map(n => `
+    <div class="notif-item ${n.type}${n.done?' done':''}" id="ni-${n.id}">
+      <div class="notif-item-top">
+        <span class="notif-icon">${n.icon}</span>
+        <div class="notif-text">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-sub">${n.sub}</div>
+        </div>
+        <button class="notif-dismiss" onclick="dismissNotif('${n.id}')" title="Dismiss">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function getNotifItems() {
+  const items = [];
+  const dismissed = getDismissed();
+  const todayDow = todayDOW();
+
+  // Workout & Study log streaks
+  ['workout','study'].forEach(type => {
+    const ls = G.logStreaks[type];
+    const id = 'log_' + type;
+    if(dismissed.has(id)) return;
+    const label = type === 'workout' ? 'Workout Log' : 'Study Log';
+    const icon  = type === 'workout' ? '⚔️' : '📖';
+    if(ls.loggedToday) {
+      items.push({ id, done: true, type: 'habit', icon: '✅',
+        title: label,
+        sub: `Logged · 🔥 ${ls.currentStreak} day streak · Best: ${ls.bestStreak}` });
+    } else if(ls.graceActive) {
+      items.push({ id, done: false, type: 'urgent', icon: '⏳',
+        title: label,
+        sub: `Grace period — log today or streak resets (current: ${ls.currentStreak} days)` });
+    } else {
+      items.push({ id, done: false, type: 'habit', icon,
+        title: label,
+        sub: `Not logged today · 🔥 ${ls.currentStreak} day streak` });
+    }
+  });
+
+  // Active quests
+  G.quests.filter(q => q.status === 'active').forEach(q => {
+    const id = 'q_' + q.id;
+    const age = Date.now() - q.generatedAt;
+    const inGrace = age > 86400000 && age <= 172800000;
+    const rem = Math.max(0, (inGrace ? 172800000 : 86400000) - age);
+    const hrs = Math.floor(rem / 3600000);
+    const mins = Math.floor((rem % 3600000) / 60000);
+    const urgent = hrs < 3;
+    const timeStr = hrs > 0 ? `${hrs}h ${mins}m remaining` : `${mins}m remaining`;
+    if(!dismissed.has(id)) {
+      items.push({
+        id, done: false,
+        type: urgent ? 'urgent' : inGrace ? 'urgent' : 'quest',
+        icon: urgent ? '⚠️' : inGrace ? '⏳' : '⚔️',
+        title: q.title,
+        sub: inGrace
+          ? `Grace period — ${timeStr} before penalty`
+          : `Quest · ${timeStr}${q.isRecovery ? ' · RECOVERY' : ''}`,
+      });
+    }
+  });
+
+  // Pending daily habits (not done, not rest day, not frozen)
+  G.habits.forEach(h => {
+    if(h.frequency !== 'Daily') return;
+    const id = 'h_' + h.id;
+    const isRest = (h.restDays||[]).includes(todayDow);
+    if(dismissed.has(id)) return;
+    if(isRest) {
+      items.push({ id, done: true, type: 'habit', icon: '😴',
+        title: h.name, sub: 'Rest day — streak protected' });
+    } else if(h.completedToday || h.frozenToday) {
+      items.push({ id, done: true, type: 'habit', icon: h.frozenToday ? '🧊' : '✅',
+        title: h.name,
+        sub: h.frozenToday ? 'Frozen — streak safe' : `+${h.xpReward} XP earned · 🔥 ${h.currentStreak} day streak` });
+    } else {
+      const inGrace = !!h.graceActive;
+      items.push({ id, done: false,
+        type: inGrace ? 'urgent' : 'habit',
+        icon: inGrace ? '⏳' : '🔁',
+        title: h.name,
+        sub: inGrace
+          ? `Grace period active — complete now to save streak!`
+          : `+${h.xpReward} XP · 🔥 ${h.currentStreak} day streak · Penalty: -${h.xpPenalty} XP` });
+    }
+  });
+
+  // Sort: undone urgent first, then undone, then done
+  return items.sort((a,b) => {
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    if(a.type === 'urgent' && b.type !== 'urgent') return -1;
+    if(b.type === 'urgent' && a.type !== 'urgent') return 1;
+    return 0;
+  });
+}
+
+function getDismissed() {
+  try { return new Set(JSON.parse(localStorage.getItem('sl_dismissed')||'[]')); }
+  catch(e) { return new Set(); }
+}
+function saveDismissed(set) {
+  localStorage.setItem('sl_dismissed', JSON.stringify([...set]));
+}
+function dismissNotif(id) {
+  const el = document.getElementById('ni-' + id);
+  if(el) { el.style.opacity='0'; el.style.transform='translateX(20px)'; setTimeout(()=>el.remove(),300); }
+  const d = getDismissed(); d.add(id); saveDismissed(d);
+  setTimeout(updateBell, 350);
+}
+function dismissAllNotifs() {
+  const items = getNotifItems();
+  const d = getDismissed();
+  items.forEach(n => d.add(n.id));
+  saveDismissed(d);
+  buildNotifList();
+  updateBell();
+}
+
+function updateBell() {
+  const dismissed = getDismissed();
+  const pending = getNotifItems().filter(n => !n.done && !dismissed.has(n.id));
+  const count = pending.length;
+  const badge = document.getElementById('bell-badge');
+  const btn = document.getElementById('bell-btn');
+  badge.textContent = count;
+  badge.classList.toggle('hidden', count === 0);
+  btn.classList.toggle('has-items', count > 0);
+  if(notifPanelOpen) buildNotifList();
+}
+
+// Clear dismissals on new day so fresh notifs appear each session
+function clearStaleDismissals() {
+  const lastClear = localStorage.getItem('sl_dismissed_date');
+  const today = todayStr();
+  if(lastClear !== today) {
+    localStorage.removeItem('sl_dismissed');
+    localStorage.setItem('sl_dismissed_date', today);
+  }
+}
+
+// ============================
+// WEIGHT TRACKER
+// ============================
+function toggleWeightUnit() {
+  G.weightUnit = G.weightUnit === 'kg' ? 'lbs' : 'kg';
+  document.getElementById('weight-unit-toggle').textContent = G.weightUnit.toUpperCase();
+  save(); renderWeightTracker();
+}
+
+function logWeight() {
+  const raw = parseFloat(document.getElementById('weight-input').value);
+  if(!raw || raw <= 0) { toast('Enter a valid weight!', 'neg'); return; }
+  const today = todayStr();
+  // Update existing entry for today if it exists, otherwise push new
+  const existing = G.weightLog.findIndex(e => e.date === today);
+  const entry = { date: today, value: raw, unit: G.weightUnit, ts: Date.now() };
+  if(existing >= 0) {
+    G.weightLog[existing] = entry;
+    toast(`Weight updated: ${raw} ${G.weightUnit}`, 'pos');
+  } else {
+    G.weightLog.push(entry);
+    toast(`Weight logged: ${raw} ${G.weightUnit}`, 'pos');
+  }
+  document.getElementById('weight-input').value = '';
+  save(); renderWeightTracker();
+}
+
+function renderWeightTracker() {
+  const unit = G.weightUnit;
+  document.getElementById('weight-unit-toggle').textContent = unit.toUpperCase();
+
+  // Sort by timestamp
+  const logs = [...G.weightLog].sort((a,b) => a.ts - b.ts);
+
+  // Normalise all values to current unit for display
+  function convert(entry) {
+    if(entry.unit === unit) return entry.value;
+    return unit === 'kg' ? entry.value / 2.20462 : entry.value * 2.20462;
+  }
+
+  // Today display
+  const todayEntry = G.weightLog.find(e => e.date === todayStr());
+  const todayEl = document.getElementById('weight-today-display');
+  if(todayEntry) {
+    const v = parseFloat(convert(todayEntry).toFixed(1));
+    todayEl.textContent = `Today: ${v} ${unit}`;
+    todayEl.style.color = 'var(--green)';
+  } else {
+    todayEl.textContent = 'Not logged today';
+    todayEl.style.color = 'var(--text-dim)';
+  }
+
+  // Stats
+  if(logs.length) {
+    const vals = logs.map(e => parseFloat(convert(e).toFixed(1)));
+    const current = vals[vals.length-1];
+    const start   = vals[0];
+    const low     = Math.min(...vals);
+    const high    = Math.max(...vals);
+    const change  = parseFloat((current - start).toFixed(1));
+    const changeStr = (change > 0 ? '+' : '') + change + ' ' + unit;
+    document.getElementById('w-current').textContent = current + ' ' + unit;
+    document.getElementById('w-start').textContent   = start   + ' ' + unit;
+    document.getElementById('w-change').textContent  = changeStr;
+    document.getElementById('w-low').textContent     = low     + ' ' + unit;
+    document.getElementById('w-high').textContent    = high    + ' ' + unit;
+    document.getElementById('w-entries').textContent = logs.length;
+    // Colour the change
+    const changeEl = document.getElementById('w-change');
+    changeEl.style.color = change < 0 ? 'var(--green)' : change > 0 ? 'var(--red)' : 'var(--text-bright)';
+  } else {
+    ['w-current','w-start','w-change','w-low','w-high'].forEach(id =>
+      document.getElementById(id).textContent = '—');
+    document.getElementById('w-entries').textContent = '0';
+  }
+
+  drawWeightChart(logs.map(e => ({
+    date: e.date, value: parseFloat(convert(e).toFixed(1))
+  })));
+}
+
+function drawWeightChart(logs) {
+  const canvas = document.getElementById('weight-canvas');
+  const wrap   = document.getElementById('weight-canvas-wrap');
+  canvas.width  = wrap.clientWidth  || 500;
+  canvas.height = wrap.clientHeight || 180;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const W = canvas.width, H = canvas.height;
+
+  if(logs.length < 2) {
+    ctx.fillStyle = 'var(--text-dim)';
+    // resolve CSS variable manually
+    const light = document.body.classList.contains('light');
+    ctx.fillStyle = light ? '#6270a0' : '#6a7a94';
+    ctx.font = '13px Rajdhani, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(logs.length === 0 ? 'No weight entries yet' : 'Log at least 2 entries to see chart', W/2, H/2);
+    return;
+  }
+
+  const light = document.body.classList.contains('light');
+  const lineColor  = light ? '#0068cc' : '#00d4ff';
+  const dotColor   = light ? '#5500cc' : '#7b2fff';
+  const gridColor  = light ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.06)';
+  const textColor  = light ? '#6270a0' : '#6a7a94';
+
+  const pad = { t:10, r:16, b:32, l:52 };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+  const vals = logs.map(l => l.value);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+  const paddedMin = minV - range * 0.15;
+  const paddedMax = maxV + range * 0.15;
+  const paddedRange = paddedMax - paddedMin;
+
+  // Grid lines
+  for(let i=0; i<=4; i++) {
+    const y = pad.t + ch - (ch/4)*i;
+    ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cw, y); ctx.stroke();
+    const label = (paddedMin + (paddedRange/4)*i).toFixed(1);
+    ctx.fillStyle = textColor; ctx.font = '10px Rajdhani,sans-serif';
+    ctx.textAlign = 'right'; ctx.fillText(label, pad.l-6, y+4);
+  }
+
+  const xStep = cw / (logs.length - 1);
+  const toY = v => pad.t + ch - ((v - paddedMin) / paddedRange) * ch;
+  const toX = i => pad.l + i * xStep;
+
+  // Gradient fill under line
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t+ch);
+  grad.addColorStop(0, light ? 'rgba(0,104,204,0.15)' : 'rgba(0,212,255,0.15)');
+  grad.addColorStop(1, 'transparent');
+  ctx.beginPath();
+  logs.forEach((l,i) => i===0 ? ctx.moveTo(toX(i), toY(l.value)) : ctx.lineTo(toX(i), toY(l.value)));
+  ctx.lineTo(toX(logs.length-1), pad.t+ch);
+  ctx.lineTo(toX(0), pad.t+ch);
+  ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.strokeStyle = lineColor; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  logs.forEach((l,i) => i===0 ? ctx.moveTo(toX(i), toY(l.value)) : ctx.lineTo(toX(i), toY(l.value)));
+  ctx.stroke();
+
+  // Dots + x-axis labels
+  const labelStep = Math.max(1, Math.floor(logs.length / 6));
+  logs.forEach((l,i) => {
+    ctx.beginPath(); ctx.arc(toX(i), toY(l.value), 3, 0, Math.PI*2);
+    ctx.fillStyle = dotColor; ctx.fill();
+    if(i % labelStep === 0) {
+      const d = new Date(l.date);
+      const label = `${d.getMonth()+1}/${d.getDate()}`;
+      ctx.fillStyle = textColor; ctx.font = '9px Rajdhani,sans-serif';
+      ctx.textAlign = 'center'; ctx.fillText(label, toX(i), H-8);
+    }
+  });
+}
+
+window.addEventListener('resize', () => {
+  if(currentChart) drawChart(currentChart);
+  renderWeightTracker();
+});
+
+// ============================
+// TIMER REFRESH
+// ============================
+setInterval(() => { renderQuests(); updateBell(); }, 30000);
+
+// ============================
+// INIT
+// ============================
+function init() {
+  load();
+  loadTheme();
+  clearStaleDismissals();
+  dailyReset();
+  renderHeader();
+  renderQuests();
+  renderHabits();
+  renderLogStreaks();
+  renderWeightTracker();
+  renderBadges();
+  renderHistory();
+  setTimeout(() => { drawChart('xp'); updateBell(); }, 150);
+  // Staggered reveal
+  document.querySelectorAll('.section').forEach((s,i)=>{
+    s.style.opacity='0';
+    s.style.transform='translateY(16px)';
+    s.style.transition=`opacity 0.4s ${i*0.06}s ease, transform 0.4s ${i*0.06}s ease`;
+    requestAnimationFrame(()=>{s.style.opacity='1';s.style.transform='translateY(0)';});
+  });
+  if(G.hunter.totalXP===0) {
+    setTimeout(()=>toast('Welcome, Hunter. The System awaits your first action.','info'),600);
+  }
+}
+init();
+</script>
+</body>
+</html>
