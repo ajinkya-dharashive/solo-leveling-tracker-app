@@ -502,7 +502,32 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
 .w-stat strong { color: var(--text-bright); font-size: 15px; display: block; }
 @media (max-width: 700px) { #weight-section { grid-template-columns: 1fr; } }
 
-#chart-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+/* WEEKLY SUMMARY */
+#weekly-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap: 12px; }
+.week-stat-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+.week-stat-label { font-family: 'Rajdhani', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 4px; }
+.week-stat-val { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: var(--text-bright); line-height: 1; }
+.week-stat-sub { font-family: 'Exo 2', sans-serif; font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+.week-stat-val.pos { color: var(--green); }
+.week-stat-val.neg { color: var(--red); }
+.week-days-strip { display: flex; gap: 4px; margin-top: 12px; }
+.wday { flex: 1; text-align: center; }
+.wday-label { font-family: 'Rajdhani', sans-serif; font-size: 9px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 3px; }
+.wday-dot { width: 100%; aspect-ratio: 1; border-radius: 3px; margin: 0 auto; }
+.wday-dot.done    { background: rgba(0,255,157,0.5); border: 1px solid var(--green); }
+.wday-dot.partial { background: rgba(255,215,0,0.3); border: 1px solid var(--gold); }
+.wday-dot.missed  { background: var(--bg); border: 1px solid var(--border); }
+.wday-dot.future  { background: transparent; border: 1px dashed var(--border); opacity: 0.4; }
+
+/* 30-DAY HABIT CALENDAR */
+.habit-calendar { display: grid; grid-template-columns: repeat(15,1fr); gap: 3px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.hcal-dot { width: 100%; aspect-ratio: 1; border-radius: 2px; cursor: default; }
+.hcal-done   { background: var(--green); opacity: 0.75; }
+.hcal-rest   { background: var(--blue); opacity: 0.3; }
+.hcal-missed { background: var(--bg); border: 1px solid var(--border); }
+.hcal-future { background: transparent; }
+
+#chart-tabs { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .chart-tab {
   font-family: 'Rajdhani', sans-serif; font-size: 12px; letter-spacing: 1px;
   padding: 5px 14px; border-radius: 3px; border: 1px solid var(--border);
@@ -703,6 +728,19 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
 .t-neg { border: 1px solid var(--red); color: var(--red); }
 .t-info { border: 1px solid var(--blue); color: var(--blue); }
 
+/* COMPACT HABITS */
+#habit-grid.compact .habit-card { padding: 10px 14px; padding-right: 56px; }
+#habit-grid.compact .habit-meta,
+#habit-grid.compact .habit-best,
+#habit-grid.compact .habit-calendar,
+#habit-grid.compact .habit-streak-label { display: none; }
+#habit-grid.compact .habit-streak { font-size: 16px; margin-bottom: 0; }
+#habit-grid.compact .habit-top { margin-bottom: 4px; }
+#habit-grid.compact .habit-card { display: flex; align-items: center; gap: 10px; }
+#habit-grid.compact .habit-card > * { flex-shrink: 0; }
+#habit-grid.compact .habit-top { flex: 1; margin-bottom: 0; flex-direction: row; align-items: center; }
+#habit-grid.compact { grid-template-columns: 1fr; }
+
 /* EMPTY */
 .empty-state { text-align: center; padding: 30px; color: var(--text-dim); font-family: 'Rajdhani', sans-serif; font-size: 13px; letter-spacing: 1px; }
 
@@ -710,17 +748,24 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
 @media (max-width: 700px) {
   #stats-grid { grid-template-columns: repeat(3,1fr); }
   #quick-log-grid { grid-template-columns: 1fr; }
+  #log-streak-row { grid-template-columns: 1fr; }
   #header { grid-template-columns: 1fr; gap: 8px; }
   .overlay-big { font-size: 36px; }
-}
-</style>
+  .habit-card { padding-right: 56px; }
+  .habit-name { word-break: break-word; }
+  #notif-panel { right: -60px; width: 290px; }
+  #weight-section { grid-template-columns: 1fr; }
+}</style>
 </head>
 <body>
 
 <div id="header">
   <div id="hunter-identity">
     <div id="rank-badge">F RANK</div>
-    <div id="hunter-name">HUNTER</div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div id="hunter-name">HUNTER</div>
+      <div id="hunter-title" onclick="cycleTitle()" style="display:none;font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--gold);letter-spacing:2px;cursor:pointer;opacity:0.85" title="Click to cycle titles"></div>
+    </div>
   </div>
   <div id="xp-section">
     <div id="xp-label">
@@ -770,8 +815,8 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
   <!-- QUESTS -->
   <div class="section">
     <div class="section-header">
-      <div class="section-title">DAILY QUESTS</div>
-      <button class="btn btn-sm" onclick="openQuestModal()">+ ADD QUEST</button>
+      <div class="section-title">DAILY QUESTS <span id="quest-counter" style="font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-dim);font-weight:400;letter-spacing:1px;margin-left:6px">0 / 3</span></div>
+      <button class="btn btn-sm" id="add-quest-btn" onclick="openQuestModal()">+ ADD QUEST</button>
     </div>
     <div class="section-body">
       <div id="recovery-banner" class="recovery-banner">
@@ -790,7 +835,10 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
   <div class="section">
     <div class="section-header">
       <div class="section-title">HABIT TRACKER</div>
-      <button class="btn btn-sm btn-purple" onclick="openHabitModal()">+ ADD HABIT</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm" id="compact-toggle-btn" onclick="toggleCompactHabits()" title="Toggle compact view">⊞ COMPACT</button>
+        <button class="btn btn-sm btn-purple" onclick="openHabitModal()">+ ADD HABIT</button>
+      </div>
     </div>
     <div class="section-body">
       <div id="habit-xp-bar-wrap">
@@ -915,8 +963,22 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
         <div class="chart-tab active" data-chart="xp" onclick="switchChart('xp')">XP HISTORY</div>
         <div class="chart-tab" data-chart="stats" onclick="switchChart('stats')">STAT RADAR</div>
         <div class="chart-tab" data-chart="habits" onclick="switchChart('habits')">HABIT STREAKS</div>
+        <div class="chart-tab" data-chart="weight" onclick="switchChart('weight')">WEIGHT</div>
       </div>
       <div id="chart-canvas-wrap"><canvas id="chart-canvas"></canvas></div>
+    </div>
+  </div>
+
+  <!-- WEEKLY SUMMARY -->
+  <div class="section" id="weekly-section">
+    <div class="section-header" style="cursor:pointer" onclick="toggleWeeklySummary()">
+      <div class="section-title">WEEKLY SUMMARY</div>
+      <span id="weekly-toggle-icon" style="font-family:'Rajdhani',sans-serif;font-size:12px;color:var(--text-dim);letter-spacing:1px">▼ EXPAND</span>
+    </div>
+    <div id="weekly-body" style="display:none">
+      <div class="section-body">
+        <div id="weekly-grid"></div>
+      </div>
     </div>
   </div>
 
@@ -958,6 +1020,19 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
       </div>
     </div>
     <div class="xp-preview">XP REWARD: <span id="q-xp-preview">150</span> XP</div>
+    <div class="field" style="margin-top:10px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="q-recurring" style="width:auto;accent-color:var(--gold)">
+        <span style="color:var(--text)">Recurring Quest</span>
+      </label>
+    </div>
+    <div class="field" id="q-freq-field" style="display:none">
+      <label>Repeat Every</label>
+      <select id="q-freq">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-sm" onclick="closeModal()">CANCEL</button>
       <button class="btn btn-sm btn-gold" onclick="createQuest()">CREATE QUEST</button>
@@ -1103,6 +1178,24 @@ body.light .diff-extreme  { background: rgba(187,0,51,0.1);   color: #bb0033; bo
       <button class="btn btn-sm btn-purple" onclick="saveEditHabit()">SAVE CHANGES</button>
     </div>
   </div>
+
+  <!-- END OF DAY SUMMARY MODAL -->
+  <div class="modal" id="eod-modal" style="display:none;max-width:440px">
+    <div class="modal-title">⚔ DAILY DEBRIEF</div>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="eod-content" style="display:flex;flex-direction:column;gap:10px;margin-top:4px"></div>
+    <div class="modal-footer" style="margin-top:16px">
+      <button class="btn btn-sm btn-gold" onclick="closeModal()">ACKNOWLEDGED</button>
+    </div>
+  </div>
+</div>
+
+<!-- TITLE UNLOCK OVERLAY -->
+<div id="title-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div style="font-family:'Cinzel',serif;font-size:13px;letter-spacing:4px;color:var(--text-dim)">TITLE UNLOCKED</div>
+  <div id="title-overlay-icon" style="font-size:52px"></div>
+  <div id="title-overlay-name" style="font-family:'Cinzel',serif;font-size:24px;color:var(--gold);letter-spacing:3px;text-shadow:0 0 20px var(--gold)"></div>
+  <div id="title-overlay-desc" style="font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text-dim);letter-spacing:1px"></div>
 </div>
 
 <!-- LEVEL UP OVERLAY -->
@@ -1148,6 +1241,34 @@ const BADGE_DEFS = [
 
 const CAT_ICONS = { Health:'❤️', Productivity:'⚡', Learning:'📖', Finance:'💰', Relationships:'🤝', Creativity:'🎨', Other:'✨' };
 
+// ============================
+// TITLE DEFS
+// ============================
+const TITLE_DEFS = [
+  { id:'early_riser',     icon:'🌅', name:'Early Riser',      desc:'Log a workout before 8am' },
+  { id:'iron_body',       icon:'💪', name:'Iron Body',         desc:'STR + END ≥ 50 combined' },
+  { id:'beast',           icon:'🦾', name:'Beast',             desc:'STR ≥ 25' },
+  { id:'endurance_king',  icon:'🏃', name:'Endurance King',    desc:'END ≥ 25' },
+  { id:'swift',           icon:'⚡', name:'Swift',             desc:'AGI ≥ 25' },
+  { id:'on_fire',         icon:'🔥', name:'On Fire',           desc:'Any streak ≥ 14 days' },
+  { id:'relentless_one',  icon:'💀', name:'Relentless',        desc:'Any streak ≥ 30 days' },
+  { id:'scholar_title',   icon:'📚', name:'Scholar',           desc:'INT ≥ 20' },
+  { id:'mind_forged',     icon:'🧠', name:'Mind Forged',       desc:'INT ≥ 40' },
+  { id:'deep_focus',      icon:'🎯', name:'Deep Focus',        desc:'10 Deep Work sessions' },
+  { id:'shadow_walker',   icon:'🌑', name:'Shadow Walker',     desc:'Complete 10 quests' },
+  { id:'veteran_hunter',  icon:'👑', name:'Veteran Hunter',    desc:'Reach Level 20' },
+  { id:'quest_lord',      icon:'⚔️', name:'Quest Lord',        desc:'Complete 25 quests' },
+  { id:'overachiever',    icon:'🌟', name:'Overachiever',      desc:'All habits done same day × 5' },
+  { id:'disciplined',     icon:'🧘', name:'Disciplined',       desc:'7-day habit streak' },
+  { id:'champion_title',  icon:'🏆', name:'Champion',          desc:'Earn 10 badges' },
+  { id:'ice_veins',       icon:'🧊', name:'Ice Veins',         desc:'Use freeze token 3 times' },
+  { id:'comeback_kid',    icon:'💥', name:'Comeback Kid',      desc:'Complete a recovery quest' },
+  { id:'bookworm',        icon:'📖', name:'Bookworm',          desc:'20 study sessions' },
+  { id:'grinder_title',   icon:'⚙️', name:'Grinder',           desc:'20 workout sessions' },
+  { id:'night_owl',       icon:'🌙', name:'Night Owl',         desc:'Log study after 10pm × 3' },
+  { id:'solo_title',      icon:'🗡️', name:'Solo',              desc:'Complete 5 quests in one week' },
+];
+
 const RANK_INFO = [
   { rank:'S', minLevel:50, color:'#ffd700' },
   { rank:'A', minLevel:40, color:'#ff4444' },
@@ -1185,14 +1306,19 @@ let G = {
   habits: [],
   habitXPToday: 0,
   badges: BADGE_DEFS.map(b => ({ id:b.id, earned:false, earnedDate:null })),
+  titles: [],          // [{ id, earnedDate }]
+  equippedTitle: null, // id string
   history: [],
   deepWorkCount: 0,
   highIntensityCount: 0,
+  nightOwlCount: 0,
+  freezeUseCount: 0,
+  allHabitDayCount: 0,
   logStreaks: {
     workout: { currentStreak:0, bestStreak:0, lastLogged:null, loggedToday:false, graceActive:false, totalLogs:0, frozenToday:false },
     study:   { currentStreak:0, bestStreak:0, lastLogged:null, loggedToday:false, graceActive:false, totalLogs:0, frozenToday:false },
   },
-  weightLog: [],   // [{ date: 'Mon Jan 01 2025', value: 70.5, unit: 'kg', ts: 1234567890 }]
+  weightLog: [],
   weightUnit: 'kg',
 };
 
@@ -1209,12 +1335,24 @@ function load() {
     const d = JSON.parse(raw);
     G.hunter = {...G.hunter, ...d.hunter};
     G.stats = {...G.stats, ...(d.stats||{})};
-    G.quests = d.quests || [];
-    G.habits = d.habits || [];
+    // Migrate habits — ensure all new fields exist
+    G.habits = (d.habits||[]).map(h => ({
+      completionLog:[], frozenToday:false, graceActive:false,
+      restDays:[], failureCount:0, ...h
+    }));
+    // Migrate quests — ensure recurring fields exist
+    G.quests = (d.quests||[]).map(q => ({
+      isRecovery:false, graceShown:false, recurring:false, recurringFreq:null, ...q
+    }));
     G.habitXPToday = d.habitXPToday || 0;
     G.history = d.history || [];
     G.deepWorkCount = d.deepWorkCount || 0;
     G.highIntensityCount = d.highIntensityCount || 0;
+    G.nightOwlCount = d.nightOwlCount || 0;
+    G.freezeUseCount = d.freezeUseCount || 0;
+    G.allHabitDayCount = d.allHabitDayCount || 0;
+    G.titles = d.titles || [];
+    G.equippedTitle = d.equippedTitle || null;
     if(d.logStreaks) {
       G.logStreaks.workout = {...G.logStreaks.workout, ...d.logStreaks.workout};
       G.logStreaks.study   = {...G.logStreaks.study,   ...d.logStreaks.study};
@@ -1225,7 +1363,7 @@ function load() {
       const f = (d.badges||[]).find(x => x.id === b.id);
       return f || { id:b.id, earned:false, earnedDate:null };
     });
-  } catch(e){ console.error(e); }
+  } catch(e){ console.error('Load error:', e); }
 }
 
 // ============================
@@ -1404,6 +1542,7 @@ function renderHeader() {
   const ft = h.freezeTokens || 0;
   document.getElementById('freeze-count').textContent = ft;
   document.getElementById('freeze-btn').disabled = ft <= 0 || h.freezeUsedToday;
+  renderTitle();
   renderStats();
 }
 function renderStats() {
@@ -1460,7 +1599,7 @@ function renderQuests() {
     const dc = diffMap[d] || 'diff-extreme';
     const dl = `${d} ${nameMap[d] || 'EXTREME'}`;
     return `<div class="quest-card${q.isRecovery?' recovery':''}">
-      <div class="quest-top"><div class="quest-title">${q.title}</div><div class="diff-badge ${dc}">${dl}</div></div>
+      <div class="quest-top"><div class="quest-title">${q.title}${q.recurring?` <span style="font-size:10px;color:var(--blue);letter-spacing:1px">🔁 ${q.recurringFreq||''}</span>`:''}</div><div class="diff-badge ${dc}">${dl}</div></div>
       <div class="quest-desc">${q.description||'Complete this mission to earn your reward.'}</div>
       <div class="quest-footer">
         <div class="quest-xp">⚡ ${q.xpReward} XP</div>
@@ -1474,14 +1613,23 @@ function renderQuests() {
       </div>
     </div>`;
   }).join('');
+  updateQuestCounter();
 }
 function openQuestModal() {
+  const active = G.quests.filter(q => q.status === 'active').length;
+  if(active >= 3) { toast('Quest limit reached! Complete or abandon a quest first.','neg'); return; }
   document.getElementById('q-title').value='';
   document.getElementById('q-desc').value='';
   document.getElementById('q-diff').value=1;
+  document.getElementById('q-recurring').checked=false;
+  document.getElementById('q-freq-field').style.display='none';
   updateQDiff();
   showModal('quest-modal');
 }
+// Show/hide recurring frequency
+document.getElementById('q-recurring').addEventListener('change', function() {
+  document.getElementById('q-freq-field').style.display = this.checked ? 'block' : 'none';
+});
 function updateQDiff() {
   const v = parseFloat(document.getElementById('q-diff').value);
   const labels={1:'Easy',1.5:'Moderate',2:'Challenging',2.5:'Hard',3:'Extreme'};
@@ -1493,8 +1641,11 @@ function createQuest() {
   const t=document.getElementById('q-title').value.trim();
   if(!t){toast('Quest needs a title!','neg');return;}
   const d=parseFloat(document.getElementById('q-diff').value);
+  const recurring=document.getElementById('q-recurring').checked;
+  const recurringFreq=document.getElementById('q-freq').value;
   G.quests.push({id:'q'+Date.now(),title:t,description:document.getElementById('q-desc').value.trim(),
-    difficulty:d,xpReward:100+(50*d),status:'active',generatedAt:Date.now(),completedAt:null,isRecovery:false});
+    difficulty:d,xpReward:100+(50*d),status:'active',generatedAt:Date.now(),completedAt:null,
+    isRecovery:false,recurring,recurringFreq:recurring?recurringFreq:null});
   save(); closeModal(); renderQuests();
 }
 function completeQuest(id) {
@@ -1507,7 +1658,18 @@ function completeQuest(id) {
   if(q.isRecovery) checkBadge('comeback');
   toast(`Quest Complete! +${earned} XP`,'pos');
   showFlavor('w-flavor',"A hunter's resolve becomes steel. Mission accomplished.");
-  renderQuests(); checkBadges(); save(); updateBell();
+  // Auto-recreate recurring quests
+  if(q.recurring && q.recurringFreq) {
+    const delay = q.recurringFreq === 'daily' ? 86400000 : 604800000;
+    G.quests.push({
+      id:'q'+Date.now(), title:q.title, description:q.description,
+      difficulty:q.difficulty, xpReward:q.xpReward,
+      status:'active', generatedAt:Date.now()+delay, completedAt:null,
+      isRecovery:false, recurring:true, recurringFreq:q.recurringFreq
+    });
+    toast(`🔁 Recurring quest scheduled (${q.recurringFreq})`, 'info');
+  }
+  renderQuests(); checkBadges(); checkTitles(); save(); updateBell();
 }
 function deleteQuest(id) { G.quests=G.quests.filter(q=>q.id!==id); save(); renderQuests(); }
 
@@ -1552,11 +1714,13 @@ function renderHabits() {
       </div>
       ${statusBlock}
       <div class="habit-best">BEST: ${h.bestStreak} days${restLabel?' · '+restLabel:''}</div>
+      ${renderHabitCalendar(h)}
     </div>`;
   }).join('');
   const pct=Math.min(100,G.habitXPToday);
   document.getElementById('habit-daily-bar').style.width=pct+'%';
   document.getElementById('habit-xp-count').textContent=`${G.habitXPToday} / 100 XP`;
+  applyCompactHabits();
 }
 function openHabitModal() {
   document.getElementById('h-name').value='';
@@ -1581,7 +1745,8 @@ function createHabit() {
     difficulty:parseFloat(document.getElementById('h-diff').value),
     restDays,
     currentStreak:0,bestStreak:0,totalCompletions:0,failureCount:0,
-    lastCompleted:null,completedToday:false,graceActive:false,frozenToday:false});
+    lastCompleted:null,completedToday:false,graceActive:false,frozenToday:false,
+    completionLog:[]});
   checkBadge('first_habit'); save(); closeModal(); renderHabits();
 }
 function completeHabit(id) {
@@ -1592,6 +1757,10 @@ function completeHabit(id) {
   let xp=Math.min(h.xpReward,cap);
   h.completedToday=true; h.currentStreak++; h.totalCompletions++;
   h.lastCompleted=todayStr();
+  if(!h.completionLog) h.completionLog=[];
+  if(!h.completionLog.includes(todayStr())) h.completionLog.push(todayStr());
+  // Keep only last 90 days
+  if(h.completionLog.length > 90) h.completionLog = h.completionLog.slice(-90);
   if(h.currentStreak>h.bestStreak) h.bestStreak=h.currentStreak;
   G.habitXPToday+=xp;
   if(h.currentStreak%7===0) {
@@ -1603,9 +1772,41 @@ function completeHabit(id) {
   }
   awardXP(xp,`Habit: ${h.name}`);
   toast(`Habit Complete! +${xp} XP`,'pos');
-  checkBadges(); save(); renderHabits(); updateBell();
+  // Check if all daily habits done today
+  const allDone = G.habits.filter(h2 => h2.frequency==='Daily' && !isRestDay(h2)).every(h2 => h2.completedToday);
+  if(allDone && G.habits.filter(h2=>h2.frequency==='Daily'&&!isRestDay(h2)).length > 0) {
+    G.allHabitDayCount = (G.allHabitDayCount||0) + 1;
+  }
+  checkBadges(); checkTitles(); save(); renderHabits(); updateBell();
 }
 function deleteHabit(id) { G.habits=G.habits.filter(h=>h.id!==id); save(); renderHabits(); }
+
+// ============================
+// HABIT 30-DAY CALENDAR
+// ============================
+function renderHabitCalendar(h) {
+  const days = 30;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const log = h.completionLog || [];
+  const rest = h.restDays || [];
+  let html = '<div class="habit-calendar" title="Last 30 days">';
+  for(let i = days-1; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const ds = d.toDateString();
+    const dow = d.getDay();
+    const isToday = i === 0;
+    const isFuture = false; // all are past or today
+    const isRest = rest.includes(dow);
+    const isDone = log.includes(ds);
+    let cls = 'hcal-missed';
+    if(isDone) cls = 'hcal-done';
+    else if(isRest) cls = 'hcal-rest';
+    const title = `${d.toLocaleDateString('en-IN',{month:'short',day:'numeric'})}${isDone?' ✓':isRest?' (rest)':' ✗'}`;
+    html += `<div class="hcal-dot ${cls}${isToday?' hcal-today':''}" title="${title}"></div>`;
+  }
+  html += '</div>';
+  return html;
+}
 
 // ============================
 // EDIT QUEST
@@ -1707,13 +1908,14 @@ function useFreeze() {
 
   G.hunter.freezeUsedToday = true;
   G.hunter.freezeTokens--;
+  G.freezeUseCount = (G.freezeUseCount||0) + 1;
 
   const logLabel = logsFrozen.length
     ? logsFrozen.map(t => t.charAt(0).toUpperCase()+t.slice(1)).join(' & ') + ' log streak protected'
     : 'Already logged both today — tokens saved but nothing to freeze';
   addHist('pos', `🧊 Streak Freeze used — ${logLabel}`, 0);
   toast(`🧊 Freeze activated! ${logLabel}.`, 'badge');
-  save(); renderHeader(); renderLogStreaks(); updateBell();
+  save(); renderHeader(); renderLogStreaks(); checkTitles(); updateBell();
 }
 
 // ============================
@@ -1778,13 +1980,15 @@ function logWorkout() {
   const xp=Math.max(10,Math.floor(dur*mult[intensity]));
   G.stats[stat]++;
   if(intensity==='High') G.highIntensityCount++;
+  // Early riser title check
+  if(new Date().getHours() < 8) unlockTitle('early_riser');
   tickLogStreak('workout');
   awardXP(xp,`Workout: ${act} (${dur}min, ${intensity})`);
   document.getElementById('w-activity').value='';
   document.getElementById('w-duration').value='';
   showFlavor('w-flavor',W_FLAVORS[Math.floor(Math.random()*W_FLAVORS.length)]);
   toast(`+${xp} XP | ${stat} +1 | 🔥 ${G.logStreaks.workout.currentStreak}d streak`,'pos');
-  checkBadges(); save(); renderStats(); renderLogStreaks(); updateBell();
+  checkBadges(); checkTitles(); save(); renderStats(); renderLogStreaks(); updateBell();
 }
 function logStudy() {
   const sub=document.getElementById('s-subject').value.trim();
@@ -1796,13 +2000,16 @@ function logStudy() {
   const xp=Math.max(10,Math.floor(dur*mult[focus]));
   G.stats[stat]++;
   if(focus==='Deep') G.deepWorkCount++;
+  // Night owl title check
+  const hr = new Date().getHours();
+  if(hr >= 22) { G.nightOwlCount = (G.nightOwlCount||0) + 1; }
   tickLogStreak('study');
   awardXP(xp,`Study: ${sub} (${dur}min, ${focus})`);
   document.getElementById('s-subject').value='';
   document.getElementById('s-duration').value='';
   showFlavor('s-flavor',S_FLAVORS[Math.floor(Math.random()*S_FLAVORS.length)]);
   toast(`+${xp} XP | ${stat} +1 | 🔥 ${G.logStreaks.study.currentStreak}d streak`,'pos');
-  checkBadge('scholar'); checkBadges(); save(); renderStats(); renderLogStreaks(); updateBell();
+  checkBadge('scholar'); checkBadges(); checkTitles(); save(); renderStats(); renderLogStreaks(); updateBell();
 }
 function getRadio(gid) {
   const btns=document.querySelectorAll(`#${gid} .radio-btn`);
@@ -1976,29 +2183,40 @@ function importJSON(e) {
   const reader = new FileReader();
   reader.onload = ev => {
     try {
-      const parsed = JSON.parse(ev.target.result);
-      // Validate basic structure
-      if(!parsed.hunter || !parsed.stats) { toast('Invalid save file!', 'neg'); return; }
-      G.hunter = {...G.hunter, ...parsed.hunter};
-      G.stats = {...G.stats, ...(parsed.stats||{})};
-      G.quests = parsed.quests || [];
-      G.habits = parsed.habits || [];
-      G.habitXPToday = parsed.habitXPToday || 0;
-      G.history = parsed.history || [];
-      G.deepWorkCount = parsed.deepWorkCount || 0;
-      G.highIntensityCount = parsed.highIntensityCount || 0;
+      const d = JSON.parse(ev.target.result);
+      if(!d.hunter || !d.stats) { toast('Invalid save file!', 'neg'); return; }
+      G.hunter = {...G.hunter, ...d.hunter};
+      G.stats = {...G.stats, ...(d.stats||{})};
+      G.habits = (d.habits||[]).map(h => ({
+        completionLog:[], frozenToday:false, graceActive:false,
+        restDays:[], failureCount:0, ...h
+      }));
+      G.quests = (d.quests||[]).map(q => ({
+        isRecovery:false, graceShown:false, recurring:false, recurringFreq:null, ...q
+      }));
+      G.habitXPToday = d.habitXPToday || 0;
+      G.history = d.history || [];
+      G.deepWorkCount = d.deepWorkCount || 0;
+      G.highIntensityCount = d.highIntensityCount || 0;
+      if(d.logStreaks) {
+        G.logStreaks.workout = {...G.logStreaks.workout, ...d.logStreaks.workout};
+        G.logStreaks.study   = {...G.logStreaks.study,   ...d.logStreaks.study};
+      }
+      G.weightLog  = d.weightLog  || [];
+      G.weightUnit = d.weightUnit || 'kg';
       G.badges = BADGE_DEFS.map(b => {
-        const f = (parsed.badges||[]).find(x=>x.id===b.id);
+        const f = (d.badges||[]).find(x=>x.id===b.id);
         return f || { id:b.id, earned:false, earnedDate:null };
       });
       save();
-      renderHeader(); renderQuests(); renderHabits(); renderBadges(); renderHistory();
+      renderHeader(); renderQuests(); renderHabits(); renderLogStreaks();
+      renderWeightTracker(); renderBadges(); renderHistory();
       drawChart(currentChart);
       toast(`Save imported! Welcome back, ${G.hunter.name}.`, 'badge');
     } catch(err) { toast('Failed to read file. Is it a valid JSON save?', 'neg'); }
   };
   reader.readAsText(file);
-  e.target.value = ''; // reset so same file can be re-imported
+  e.target.value = '';
 }
 
 // ============================
@@ -2060,6 +2278,19 @@ function drawChart(type) {
     const habits = G.habits.slice(0,8);
     if(!habits.length) { drawEmpty(ctx, W, H, textDim, 'Add habits to see streak chart'); return; }
     drawBarChart(ctx, W, H, habits, gold, purple, textDim, gridLine);
+  }
+
+  else if(type === 'weight') {
+    const unit = G.weightUnit || 'kg';
+    function convertW(e) {
+      if(e.unit === unit) return e.value;
+      return unit === 'kg' ? e.value / 2.20462 : e.value * 2.20462;
+    }
+    const logs = [...G.weightLog].sort((a,b) => a.ts - b.ts);
+    if(logs.length < 2) { drawEmpty(ctx, W, H, textDim, 'Log at least 2 weight entries to see chart'); return; }
+    const vals = logs.map(e => parseFloat(convertW(e).toFixed(1)));
+    const dateLabels = logs.map(e => { const d=new Date(e.ts); return `${d.getMonth()+1}/${d.getDate()}`; });
+    drawLineChart(ctx, W, H, vals, blue, purple, textDim, gridLine, 'Weight', dateLabels);
   }
 }
 
@@ -2545,9 +2776,329 @@ window.addEventListener('resize', () => {
 });
 
 // ============================
+// WEEKLY SUMMARY
+// ============================
+let weeklySummaryOpen = false;
+function toggleWeeklySummary() {
+  weeklySummaryOpen = !weeklySummaryOpen;
+  document.getElementById('weekly-body').style.display = weeklySummaryOpen ? 'block' : 'none';
+  document.getElementById('weekly-toggle-icon').textContent = weeklySummaryOpen ? '▲ COLLAPSE' : '▼ EXPAND';
+  if(weeklySummaryOpen) renderWeeklySummary();
+}
+
+function getWeekBounds() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const dow = now.getDay(); // 0=Sun
+  const mon = new Date(now); mon.setDate(now.getDate() - ((dow+6)%7)); // Monday
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  return { mon, sun, now };
+}
+
+function renderWeeklySummary() {
+  const { mon, sun, now } = getWeekBounds();
+  const monTs = mon.getTime(), sunTs = sun.getTime() + 86399999;
+
+  // XP earned this week from history
+  const weekXP = G.history
+    .filter(e => e.delta === '+' && e.ts >= monTs && e.ts <= sunTs)
+    .reduce((s,e) => s + e.xp, 0);
+
+  // Quests completed this week
+  const weekQuests = G.quests.filter(q => q.status==='completed' && q.completedAt >= monTs && q.completedAt <= sunTs).length;
+
+  // Habits completed vs expected this week
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let habitsDone = 0, habitsExpected = 0;
+  G.habits.filter(h => h.frequency === 'Daily').forEach(h => {
+    for(let i=0; i<7; i++) {
+      const d = new Date(mon); d.setDate(mon.getDate()+i);
+      if(d > now) break;
+      const dow = d.getDay();
+      const isRest = (h.restDays||[]).includes(dow);
+      if(!isRest) habitsExpected++;
+      if(!isRest && (h.completionLog||[]).includes(d.toDateString())) habitsDone++;
+    }
+  });
+
+  // Workout & study logs this week
+  const weekWorkouts = G.logStreaks.workout.totalLogs > 0
+    ? G.history.filter(e => e.delta==='+' && e.label.startsWith('Workout:') && e.ts >= monTs && e.ts <= sunTs).length : 0;
+  const weekStudy = G.history.filter(e => e.delta==='+' && e.label.startsWith('Study:') && e.ts >= monTs && e.ts <= sunTs).length;
+
+  // Weight change this week
+  const weekWeights = [...G.weightLog]
+    .filter(e => e.ts >= monTs && e.ts <= sunTs)
+    .sort((a,b) => a.ts-b.ts);
+  let weightChange = null;
+  if(weekWeights.length >= 2) {
+    const u = G.weightUnit;
+    const conv = e => e.unit===u ? e.value : (u==='kg' ? e.value/2.20462 : e.value*2.20462);
+    weightChange = parseFloat((conv(weekWeights[weekWeights.length-1]) - conv(weekWeights[0])).toFixed(1));
+  }
+
+  // Build day-by-day strip (Mon–Sun)
+  const dayNames = ['M','T','W','T','F','S','S'];
+  let dayStrip = '<div class="week-days-strip">';
+  for(let i=0; i<7; i++) {
+    const d = new Date(mon); d.setDate(mon.getDate()+i);
+    const isFuture = d > now;
+    const ds = d.toDateString();
+    // count habits done vs expected for this day
+    let done=0, exp=0;
+    G.habits.filter(h=>h.frequency==='Daily').forEach(h=>{
+      const isRest=(h.restDays||[]).includes(d.getDay());
+      if(!isRest){ exp++; if((h.completionLog||[]).includes(ds)) done++; }
+    });
+    let cls = isFuture ? 'future' : (exp===0 ? 'future' : done===exp ? 'done' : done>0 ? 'partial' : 'missed');
+    dayStrip += `<div class="wday"><div class="wday-label">${dayNames[i]}</div><div class="wday-dot ${cls}"></div></div>`;
+  }
+  dayStrip += '</div>';
+
+  const wChangeStr = weightChange === null ? '—' :
+    (weightChange > 0 ? '+'+weightChange : weightChange.toString()) + ' ' + G.weightUnit;
+  const wChangeCls = weightChange === null ? '' : weightChange < 0 ? 'pos' : weightChange > 0 ? 'neg' : '';
+
+  document.getElementById('weekly-grid').innerHTML = `
+    <div class="week-stat-card">
+      <div class="week-stat-label">XP EARNED</div>
+      <div class="week-stat-val pos">+${weekXP}</div>
+      <div class="week-stat-sub">this week</div>
+    </div>
+    <div class="week-stat-card">
+      <div class="week-stat-label">HABITS</div>
+      <div class="week-stat-val">${habitsDone}<span style="font-size:14px;color:var(--text-dim)"> / ${habitsExpected}</span></div>
+      <div class="week-stat-sub">completed</div>
+    </div>
+    <div class="week-stat-card">
+      <div class="week-stat-label">QUESTS</div>
+      <div class="week-stat-val">${weekQuests}</div>
+      <div class="week-stat-sub">completed</div>
+    </div>
+    <div class="week-stat-card">
+      <div class="week-stat-label">WORKOUTS</div>
+      <div class="week-stat-val">${weekWorkouts}</div>
+      <div class="week-stat-sub">sessions logged</div>
+    </div>
+    <div class="week-stat-card">
+      <div class="week-stat-label">STUDY</div>
+      <div class="week-stat-val">${weekStudy}</div>
+      <div class="week-stat-sub">sessions logged</div>
+    </div>
+    <div class="week-stat-card">
+      <div class="week-stat-label">WEIGHT CHANGE</div>
+      <div class="week-stat-val ${wChangeCls}">${wChangeStr}</div>
+      <div class="week-stat-sub">${weekWeights.length} entries</div>
+    </div>
+    <div class="week-stat-card" style="grid-column:1/-1">
+      <div class="week-stat-label">DAILY HABIT COMPLETION</div>
+      ${dayStrip}
+    </div>
+  `;
+}
+
+// ============================
+// TITLES SYSTEM
+// ============================
+function unlockTitle(id) {
+  if(G.titles.find(t => t.id === id)) return; // already earned
+  const def = TITLE_DEFS.find(t => t.id === id);
+  if(!def) return;
+  G.titles.push({ id, earnedDate: new Date().toLocaleDateString() });
+  // Auto-equip first title earned
+  if(!G.equippedTitle) G.equippedTitle = id;
+  save();
+  // Show title unlock overlay
+  const ov = document.getElementById('title-overlay');
+  document.getElementById('title-overlay-icon').textContent = def.icon;
+  document.getElementById('title-overlay-name').textContent = def.name;
+  document.getElementById('title-overlay-desc').textContent = def.desc;
+  ov.style.display = 'flex';
+  setTimeout(() => { ov.style.display = 'none'; }, 3000);
+  toast(`✨ TITLE UNLOCKED: ${def.icon} ${def.name}`, 'badge');
+  renderTitle();
+}
+
+function renderTitle() {
+  const el = document.getElementById('hunter-title');
+  if(!G.equippedTitle || !G.titles.length) { el.style.display = 'none'; return; }
+  const def = TITLE_DEFS.find(t => t.id === G.equippedTitle);
+  if(!def) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.textContent = `${def.icon} ${def.name.toUpperCase()}`;
+  el.title = `Click to cycle titles (${G.titles.length} earned)`;
+}
+
+function cycleTitle() {
+  if(!G.titles.length) return;
+  const ids = G.titles.map(t => t.id);
+  const idx = ids.indexOf(G.equippedTitle);
+  G.equippedTitle = ids[(idx + 1) % ids.length];
+  save(); renderTitle();
+  const def = TITLE_DEFS.find(t => t.id === G.equippedTitle);
+  if(def) toast(`Title: ${def.icon} ${def.name}`, 'info');
+}
+
+function checkTitles() {
+  const s = G.stats;
+  const qDone = G.quests.filter(q => q.status === 'completed').length;
+  const badgesEarned = G.badges.filter(b => b.earned).length;
+  const maxHabitStreak = Math.max(0, ...G.habits.map(h => h.currentStreak));
+  const maxLogStreak = Math.max(G.logStreaks.workout.currentStreak, G.logStreaks.study.currentStreak);
+  const maxStreak = Math.max(maxHabitStreak, maxLogStreak);
+
+  if(s.STR + s.END >= 50)            unlockTitle('iron_body');
+  if(s.STR >= 25)                     unlockTitle('beast');
+  if(s.END >= 25)                     unlockTitle('endurance_king');
+  if(s.AGI >= 25)                     unlockTitle('swift');
+  if(s.INT >= 20)                     unlockTitle('scholar_title');
+  if(s.INT >= 40)                     unlockTitle('mind_forged');
+  if(maxStreak >= 14)                 unlockTitle('on_fire');
+  if(maxStreak >= 30)                 unlockTitle('relentless_one');
+  if(G.deepWorkCount >= 10)           unlockTitle('deep_focus');
+  if(qDone >= 10)                     unlockTitle('shadow_walker');
+  if(qDone >= 25)                     unlockTitle('quest_lord');
+  if(G.hunter.level >= 20)           unlockTitle('veteran_hunter');
+  if(badgesEarned >= 10)             unlockTitle('champion_title');
+  if((G.allHabitDayCount||0) >= 5)   unlockTitle('overachiever');
+  if(maxHabitStreak >= 7)            unlockTitle('disciplined');
+  if((G.freezeUseCount||0) >= 3)     unlockTitle('ice_veins');
+  if((G.nightOwlCount||0) >= 3)      unlockTitle('night_owl');
+  if(G.logStreaks.workout.totalLogs >= 20) unlockTitle('grinder_title');
+  if(G.logStreaks.study.totalLogs >= 20)   unlockTitle('bookworm');
+
+  // Solo: 5 quests completed in current week
+  const { mon } = getWeekBounds();
+  const weekQDone = G.quests.filter(q =>
+    q.status === 'completed' && q.completedAt >= mon.getTime()
+  ).length;
+  if(weekQDone >= 5) unlockTitle('solo_title');
+
+  // Recovery quest
+  if(G.quests.some(q => q.status === 'completed' && q.isRecovery)) unlockTitle('comeback_kid');
+
+  // Early riser — checked at workout log time (see logWorkout)
+}
+
+// ============================
+// QUEST LIMIT (max 3 active)
+// ============================
+function updateQuestCounter() {
+  const active = G.quests.filter(q => q.status === 'active').length;
+  const counter = document.getElementById('quest-counter');
+  const btn = document.getElementById('add-quest-btn');
+  if(counter) counter.textContent = `${active} / 3`;
+  if(btn) {
+    const full = active >= 3;
+    btn.disabled = full;
+    btn.textContent = full ? 'QUEST LIMIT' : '+ ADD QUEST';
+    btn.style.opacity = full ? '0.45' : '1';
+    btn.style.cursor = full ? 'not-allowed' : 'pointer';
+  }
+}
+
+// ============================
+// COMPACT HABIT VIEW
+// ============================
+let compactHabits = localStorage.getItem('sl_compact') === '1';
+function toggleCompactHabits() {
+  compactHabits = !compactHabits;
+  localStorage.setItem('sl_compact', compactHabits ? '1' : '0');
+  applyCompactHabits();
+}
+function applyCompactHabits() {
+  const grid = document.getElementById('habit-grid');
+  const btn  = document.getElementById('compact-toggle-btn');
+  if(!grid) return;
+  grid.classList.toggle('compact', compactHabits);
+  if(btn) btn.textContent = compactHabits ? '⊟ EXPANDED' : '⊞ COMPACT';
+}
+
+// ============================
+// END OF DAY SUMMARY (9pm)
+// ============================
+function checkEOD() {
+  const h = new Date().getHours();
+  if(h < 21) return; // before 9pm
+  const today = todayStr();
+  if(localStorage.getItem('sl_eod_date') === today) return; // already shown
+  localStorage.setItem('sl_eod_date', today);
+  setTimeout(showEODSummary, 1200); // slight delay after page focus
+}
+
+function showEODSummary() {
+  const today = todayStr();
+
+  // XP earned today
+  const midnight = new Date(); midnight.setHours(0,0,0,0);
+  const todayXP = G.history
+    .filter(e => e.delta === '+' && e.ts >= midnight.getTime())
+    .reduce((s,e) => s + e.xp, 0);
+
+  // Habits
+  const dailyHabits = G.habits.filter(h => h.frequency === 'Daily' && !(h.restDays||[]).includes(todayDOW()));
+  const doneTodayHabits = dailyHabits.filter(h => h.completedToday || h.frozenToday);
+  const pendingHabits = dailyHabits.filter(h => !h.completedToday && !h.frozenToday);
+
+  // Active quests remaining
+  const activeQuests = G.quests.filter(q => q.status === 'active');
+
+  // Workout / study logged
+  const workoutDone = G.logStreaks.workout.loggedToday;
+  const studyDone   = G.logStreaks.study.loggedToday;
+
+  // Performance flavour
+  const total = dailyHabits.length;
+  const done  = doneTodayHabits.length;
+  const pct   = total > 0 ? done/total : 1;
+  const flavour = pct === 1
+    ? '"A true hunter leaves nothing unfinished. The shadows bow to your will."'
+    : pct >= 0.5
+    ? '"You fought today. Tomorrow, fight harder."'
+    : '"The System watches. Rise before it assigns a penalty."';
+
+  // Build content
+  const rows = [
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:'Rajdhani',sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-dim)">⚡ XP EARNED TODAY</span>
+      <span style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--gold)">+${todayXP}</span>
+    </div>`,
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:'Rajdhani',sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-dim)">🔁 HABITS DONE</span>
+      <span style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:${done===total?'var(--green)':'var(--text-bright)'}">${done} / ${total}</span>
+    </div>`,
+    pendingHabits.length ? `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1px;color:var(--red);margin-bottom:4px">⚠ STILL PENDING:</div>
+      ${pendingHabits.map(h=>`<div style="font-family:'Exo 2',sans-serif;font-size:12px;color:var(--text-dim);padding:1px 0">• ${h.name} (-${h.xpPenalty} XP if missed)</div>`).join('')}
+    </div>` : '',
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:'Rajdhani',sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-dim)">⚔️ WORKOUT LOGGED</span>
+      <span style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:${workoutDone?'var(--green)':'var(--red)'}">${workoutDone?'✓ YES':'✗ NO'}</span>
+    </div>`,
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-family:'Rajdhani',sans-serif;font-size:13px;letter-spacing:1px;color:var(--text-dim)">📖 STUDY LOGGED</span>
+      <span style="font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;color:${studyDone?'var(--green)':'var(--red)'}">${studyDone?'✓ YES':'✗ NO'}</span>
+    </div>`,
+    activeQuests.length ? `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1px;color:var(--gold);margin-bottom:4px">⚔ ACTIVE QUESTS:</div>
+      ${activeQuests.map(q=>{
+        const rem=Math.max(0,(172800000)-(Date.now()-q.generatedAt));
+        const hrs=Math.floor(rem/3600000);
+        return `<div style="font-family:'Exo 2',sans-serif;font-size:12px;color:var(--text-dim);padding:1px 0">• ${q.title} (${hrs}h left)</div>`;
+      }).join('')}
+    </div>` : '',
+    `<div style="padding:10px 0;font-family:'Exo 2',sans-serif;font-size:12px;color:var(--purple);font-style:italic;text-align:center">${flavour}</div>`,
+  ].filter(Boolean).join('');
+
+  document.getElementById('eod-content').innerHTML = rows;
+  showModal('eod-modal');
+}
+
+// ============================
 // TIMER REFRESH
 // ============================
-setInterval(() => { renderQuests(); updateBell(); }, 30000);
+setInterval(() => { renderQuests(); updateBell(); checkEOD(); }, 30000);
+// Also check EOD once per minute more precisely
+setInterval(checkEOD, 60000);
 
 // ============================
 // INIT
@@ -2561,10 +3112,18 @@ function init() {
   renderQuests();
   renderHabits();
   renderLogStreaks();
-  renderWeightTracker();
   renderBadges();
   renderHistory();
-  setTimeout(() => { drawChart('xp'); updateBell(); }, 150);
+  checkTitles();
+  checkEOD();
+  // Defer canvas renders until layout is painted to avoid 0-width
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      drawChart('xp');
+      renderWeightTracker();
+      updateBell();
+    }, 100);
+  });
   // Staggered reveal
   document.querySelectorAll('.section').forEach((s,i)=>{
     s.style.opacity='0';
