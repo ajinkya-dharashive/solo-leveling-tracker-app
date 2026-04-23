@@ -1,4 +1,4 @@
-# SYSTEM — Hunter's Dashboard
+# SYSTEM — Hunter OS
 
 > _"Arise."_
 
@@ -8,7 +8,7 @@ A Solo Leveling–inspired gamified life tracker. One HTML file. No server. No d
 
 ## What Is This?
 
-A personal productivity tracker built around the RPG mechanics of the Solo Leveling manhwa. You are a Hunter. Your daily habits, workouts, study sessions, and goals are your quests. Every action earns XP. Every missed commitment costs you. Level up. Rank up. Become the Shadow Monarch.
+A personal productivity tracker built around the RPG mechanics of the Solo Leveling manhwa. You are a Hunter. Your daily habits, workouts, and goals are your quests. Every action earns XP. Every missed commitment costs you. Level up. Rank up. Become the Shadow Monarch.
 
 ---
 
@@ -30,165 +30,165 @@ All data is stored locally in your browser via `localStorage`. Nothing leaves yo
 
 ### ⚔️ Quest System
 
-- Create quests with a title, description, and difficulty (1.0 Easy → 3.0 Extreme)
-- Each difficulty has its own label and colour: Easy / Moderate / Challenging / Hard / Extreme
-- **48-hour grace period** — 24h normal window, then 24h grace before penalty fires
+- Create quests with a title, description, and difficulty: Easy / Moderate / Challenging / Hard / Extreme
+- XP rewards: 50 / 100 / 150 / 200 / 250 XP by difficulty
+- **48-hour system** — 24h normal window, then 24h grace before penalty fires
 - Missed quest penalty: 10–20 XP deducted, 25% chance of a Recovery Quest appearing
-- **Recurring quests** — mark a quest as Daily or Weekly; it auto-recreates on completion
+- **Recurring quests** — mark as Daily or Weekly; auto-recreates on completion
 - **Edit quests** — update title, description, or difficulty without resetting the timer
-- **Quest limit: 3 active at a time** — forces prioritisation, just like the manhwa
-- Quest counter shown in the section header (`1 / 3 ACTIVE`)
+- **Quest limit: 3 active at a time** — forces prioritisation
 
 ### 🔁 Habit Tracker
 
-- Create habits with name, category, XP reward, XP penalty, difficulty, frequency, and rest days
-- **Grace period** — miss a daily habit and get 24h to recover before the streak resets
-- Rest days — mark specific days of the week; no penalty, streak waits
-- 7-day milestone: +5 bonus XP and +1 Freeze Token
+- Create habits with name, category, XP reward, XP penalty, frequency, and rest days
+- **Strict midnight reset** — missed daily habits lose their streak at midnight; no grace for habits
+- **Rest days** — mark specific days of the week; streak is preserved, no penalty
+- **7-day milestone:** +1 Freeze Token earned per 7-day streak
 - **Edit habits** — update any setting without touching streak data
-- **Compact view** — collapse all habits to single rows for a cleaner overview; preference saved
-- **30-day calendar** — dot grid on each card showing completions, rest days, and misses at a glance
 - Daily XP cap from habits: 100 XP
+- **Stat boost on completion** — category determines which stat increases (see Stats section)
 
-### 🏋️ Quick Log — Workout & Study
+### 🏋️ Workout Log
 
-Two independent log panels. Optional — no penalty for skipping — but streak-tracked.
+Log-based tracker with streak mechanics. No penalty for skipping — but streak-tracked.
 
-**Workout Log**
-
-- Activity, duration, intensity (Low / Med / High), stat boost (STR / END / AGI)
+- Activity, duration, intensity (Low / Med / High), primary stat boost (STR / END / AGI)
 - XP = `max(10, duration × multiplier)` — Low 1×, Med 1.5×, High 2×
-
-**Study Log**
-
-- Subject, duration, focus level (Distracted / Focused / Deep), stat boost (INT / WIL)
-- XP = `max(10, duration × multiplier)` — Distracted 1×, Focused 1.5×, Deep 2×
-
-**Log Streak Cards** sit above the panels showing:
-
-- Current streak, best streak, total sessions logged (every log counts, streak ticks once/day)
-- Status badge: TODAY / ✓ DONE / ⏳ GRACE / 🧊 FROZEN
+- Streak card shows current streak, best streak, and total sessions
+- Logs automatically create a calendar entry for that day
 
 ### 🧊 Streak Freeze Tokens
 
 - Earned at every 7-day habit milestone (+1 token)
-- **Protects Workout and Study log streaks only** — habits use grace period instead
-- One freeze per day; frozen logs show 🧊 FROZEN and skip penalty on the next reset
+- Earned at every 7-day workout streak milestone (+1 token)
+- On next morning open after missing habits: a single prompt lists all at-risk habits
+- Spend **1 token** to protect **all** incomplete habits at once
+- Already-completed habits are unaffected
+- One freeze action per day maximum
+- No tokens? Penalties apply automatically
 
 ### ⚖️ Weight Tracker
 
 - Log your weight each day (KG or LBS)
 - One entry per day — logging again updates rather than duplicating
 - Stats: Current, Starting, Change (green if loss, red if gain), Lowest, Highest, Total entries
-- Line chart with gradient fill; also available as a tab in Progress Analytics
+- Line chart with gradient fill
 
 ### 📊 Progress Analytics
 
-Four switchable canvas charts (no libraries):
+Three switchable canvas charts (no libraries):
 
 - **XP History** — line chart of last 20 XP events
 - **Stat Radar** — pentagon radar for all five stats
 - **Habit Streaks** — current vs best streak bar chart per habit
-- **Weight** — full weight history line chart
 
-### 🏆 Badge System (16 badges)
+### 📅 Smart Calendar
 
-Unlock badges for milestones: First Blood, Iron Will, Beast Mode, Mind Palace, Shadow Monarch, and more. Locked badges show ❓ until earned.
+Two-tab layout with full calendar views and a sidebar.
 
-### ✨ Titles System (22 titles)
+**Views:** Month · Week · Day · Agenda
 
-Titles are earned automatically based on behaviour and displayed in gold under your hunter name. Click your title to cycle through all titles you've unlocked. A cinematic overlay flashes on unlock.
+**Auto-populated items (read-only):**
+- **Habit chips** — appear at the top of every calendar day; green if done, purple if pending, blue if rest day
+- **Quest deadline markers** — appear on the day a quest expires; colour-coded by urgency
 
-| Title             | How to Earn                   |
-| ----------------- | ----------------------------- |
-| 🌅 Early Riser    | Log a workout before 8am      |
-| 💪 Iron Body      | STR + END ≥ 50                |
-| 🦾 Beast          | STR ≥ 25                      |
-| 🏃 Endurance King | END ≥ 25                      |
-| ⚡ Swift          | AGI ≥ 25                      |
-| 🔥 On Fire        | Any streak ≥ 14 days          |
-| 💀 Relentless     | Any streak ≥ 30 days          |
-| 📚 Scholar        | INT ≥ 20                      |
-| 🧠 Mind Forged    | INT ≥ 40                      |
-| 🎯 Deep Focus     | 10 Deep Work sessions         |
-| 🌑 Shadow Walker  | Complete 10 quests            |
-| 👑 Veteran Hunter | Reach Level 20                |
-| ⚔️ Quest Lord     | Complete 25 quests            |
-| 🌟 Overachiever   | All habits done same day × 5  |
-| 🧘 Disciplined    | 7-day habit streak            |
-| 🏆 Champion       | Earn 10 badges                |
-| 🧊 Ice Veins      | Use freeze token 3 times      |
-| 💥 Comeback Kid   | Complete a recovery quest     |
-| 📖 Bookworm       | 20 study sessions             |
-| ⚙️ Grinder        | 20 workout sessions           |
-| 🌙 Night Owl      | Log study after 10pm × 3      |
-| 🗡️ Solo           | Complete 5 quests in one week |
+**Events (+ EVENT button):**
+- Title, category, date, time, XP reward, stat boost, recurrence, reminder
+- **Deadline toggle** — mark any event as a deadline; optionally set work block duration and how many days before to show them
 
-### 📅 Weekly Summary
+**Sidebar:** Mini navigator, today's XP and event summary, upcoming events
 
-Collapsible panel showing the current week at a glance:
+### 🏆 Badge System (12 badges)
 
-- XP earned, habits done vs expected, quests completed
-- Workout and study sessions logged
-- Weight change for the week
-- Mon–Sun day strip showing per-day habit completion
+Unlock badges for reaching milestones. Locked badges show a cryptic hint rather than the unlock condition — figure it out yourself.
+
+| Badge | Hint |
+|---|---|
+| ⚔️ First Blood | Draw first blood in the hunt |
+| 🔁 Creature of Habit | Build something that outlasts willpower |
+| 🛡️ Iron Will | Seven days of unbroken quest resolve |
+| 💀 Relentless | Thirty days of unbroken quest resolve |
+| 🔥 Beast Mode | Push until the ordinary breaks |
+| 💪 Unstoppable Force | Become an immovable legend |
+| ⚖️ Balanced Hunter | No stat left behind |
+| 👑 Habit Master | Rule your routines for a moon cycle |
+| 🎖️ Centurion | Reach a milestone few achieve |
+| 🌑 Shadow Monarch | Ascend to the highest throne |
+| 📅 Consistent | Seven days of perfect repetition |
+| 🔮 From the Ashes | Rise after falling |
+
+### ✨ Titles System (16 titles)
+
+Titles are earned automatically and displayed in gold under your hunter name. Click your title to cycle through all titles you've unlocked. A cinematic overlay flashes on unlock.
+
+| Title | How to Earn |
+|---|---|
+| 🌅 Early Riser | Log a workout before 8am |
+| 💪 Iron Body | STR + END ≥ 50 |
+| 🦾 Beast | STR ≥ 25 |
+| 🏃 Endurance King | END ≥ 25 |
+| ⚡ Swift | AGI ≥ 25 |
+| 🔥 On Fire | Any streak ≥ 14 days |
+| 💀 Relentless | Any streak ≥ 30 days |
+| 🌑 Shadow Walker | Complete 10 quests |
+| 👑 Veteran Hunter | Reach Level 20 |
+| ⚔️ Quest Lord | Complete 25 quests |
+| 🌟 Overachiever | All habits done same day × 5 |
+| 🧘 Disciplined | 7-day habit streak |
+| 🏆 Champion | Earn 10 badges |
+| 🧊 Ice Veins | Use freeze token × 3 |
+| 💥 Comeback Kid | Complete a recovery quest |
+| 🗡️ Solo | Complete 5 quests in one week |
 
 ### 🔔 Daily Briefing (Bell)
 
-Bell icon in the header with a red badge showing pending items. Opens a dropdown with all active quests (time remaining), pending habits, and log streak statuses. Dismiss individual items or clear all. Resets each new day.
+Bell icon in the header with a red badge showing pending items. Opens a dropdown with all active quests (time remaining), pending habits, and workout streak status. Dismiss individual items or clear all. Resets each new day.
 
 ### 🌙 End of Day Summary
 
-At 9pm a modal popup fires once per day showing:
+At 9pm a modal fires once per day showing:
 
 - XP earned today
-- Habits completed vs total, with pending habits and their penalties listed
-- Workout and study logged (yes/no)
-- Active quests still open
+- Habits completed vs total, with pending habits and their midnight penalties listed
 - A Solo Leveling flavour line based on your performance
-
-### 🎨 Light / Dark Mode
-
-Toggle in the header. Dark mode is the default (deep black, neon accents). Light mode uses a slate-blue palette with high-contrast accessible colours throughout. Preference saved.
 
 ---
 
 ## XP & Progression
 
-| Concept      | Rule                                             |
-| ------------ | ------------------------------------------------ |
-| Level        | `floor(totalXP / 1000) + 1`, no cap              |
-| XP per level | 1,000 XP flat                                    |
-| Quest XP     | `100 + (50 × difficulty)` — 150 to 250 XP        |
-| Habit XP     | 10–100 XP (your choice), capped at 100/day total |
-| Workout XP   | `max(10, duration × intensity multiplier)`       |
-| Study XP     | `max(10, duration × focus multiplier)`           |
+| Concept | Rule |
+|---|---|
+| Level | `floor(totalXP / 1000) + 1`, no cap |
+| XP per level | 1,000 XP flat |
+| Quest XP | 50 / 100 / 150 / 200 / 250 by difficulty |
+| Habit XP | 10–100 XP (your choice), capped at 100/day total |
+| Workout XP | `max(10, duration × intensity multiplier)` |
 
 ### Rank Thresholds
 
 | Rank | Level Required |
-| ---- | -------------- |
-| F    | 1–4            |
-| E    | 5–9            |
-| D    | 10–19          |
-| C    | 20–29          |
-| B    | 30–39          |
-| A    | 40–49          |
-| S    | 50+            |
+|---|---|
+| F | 1–4 |
+| E | 5–9 |
+| D | 10–19 |
+| C | 20–29 |
+| B | 30–39 |
+| A | 40–49 |
+| S | 50+ |
 
 ---
 
 ## Character Stats
 
-| Stat | Full Name    | Raised By     |
-| ---- | ------------ | ------------- |
-| STR  | Strength     | Workout → STR |
-| INT  | Intelligence | Study → INT   |
-| END  | Endurance    | Workout → END |
-| WIL  | Willpower    | Study → WIL   |
-| AGI  | Agility      | Workout → AGI |
+| Stat | Full Name | Raised By |
+|---|---|---|
+| STR | Strength | Workout (STR selected) |
+| INT | Intelligence | Learning habits |
+| END | Endurance | Workout (END selected) · Health habits |
+| WIL | Willpower | Workout (WIL selected) · Productivity / Finance / Relationships / Creativity / Other habits |
+| AGI | Agility | Workout (AGI selected) |
 
-Each stat increases by 1 per session. No cap.
+Each stat increases by 1 per workout log or habit completion. No cap.
 
 ---
 
@@ -196,22 +196,23 @@ Each stat increases by 1 per session. No cap.
 
 Runs on page load if the date has changed since last visit:
 
-1. **Habits** — missed daily habits activate grace; grace expired = penalty + streak reset
+1. **Habits** — uncompleted daily habits are flagged; if you have freeze tokens a prompt appears to protect all at once with 1 token; otherwise penalties apply and streaks reset
 2. **Quests** — expired (48h+) quests apply penalty; 24–48h window shows grace warning
-3. **Log streaks** — missed workout/study logs activate grace or reset if grace already expired; frozen logs are protected
-4. **Resets** — `completedToday`, `frozenToday`, `habitXPToday`, `freezeUsedToday` all reset
+3. **Workout streak** — missed workout log resets streak to 0
+4. **Midnight timer** — a precise midnight timer also fires to reset habit streaks without waiting for next page load
+5. **Resets** — `completedToday`, `frozenToday`, `habitXPToday`, `freezeUsedToday` all reset
 
 ---
 
 ## Saving & Backup
 
-Data lives in `localStorage` key `slv2`. It persists automatically across sessions in the same browser.
+Data lives in `localStorage` key `hos4` (auto-migrates from older `hos3` / `hos2` saves).
 
-**To back up:** Activity History section → ⬇ EXPORT JSON → saves `hunter-save-YYYY-MM-DD.json`
+**To back up:** Activity History section → ⬇ EXPORT → saves a `.json` file
 
-**To restore:** ⬆ IMPORT JSON → pick your save file → all data restored
+**To restore:** ⬆ IMPORT → pick your save file → all data restored
 
-**Migrating from older saves:** The import is fully backwards compatible. Any missing fields (titles, completionLog, recurring quests, etc.) are filled with safe defaults automatically. Your XP, streaks, badges, and history all carry over.
+Calendar events, habits, quests, stats, XP, history, weight logs, badges, and titles all export and import together in one file.
 
 ---
 
@@ -224,7 +225,7 @@ Data lives in `localStorage` key `slv2`. It persists automatically across sessio
 - Google Fonts CDN (Cinzel, Rajdhani, Exo 2)
 - Zero external dependencies
 
-Single file. ~3,100 lines. Runs entirely offline after first load.
+Single file. ~1,800 lines. Runs entirely offline after first load.
 
 ---
 
@@ -235,15 +236,6 @@ Single file. ~3,100 lines. Runs entirely offline after first load.
 3. Tap **Share → Add to Home Screen**
 4. Opens fullscreen like a native app
 5. localStorage persists between sessions
-
----
-
-## File Structure
-
-```
-index.html   — the entire app (HTML + CSS + JS in one file)
-solo-leveling-tracker-prompt.md  — full system prompt to rebuild the app from scratch
-```
 
 ---
 
