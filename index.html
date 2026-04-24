@@ -17,10 +17,84 @@
 body.light{
   --bg:#f4f6fc;--bg2:#eaedfa;--bg3:#e0e4f5;--panel:#eceffe;
   --border:#c4cae0;--border-glow:#9da8cc;
-  --blue:#0068cc;--purple:#5500cc;--gold:#996600;
-  --green:#006633;--red:#bb0033;--orange:#b45000;
+  --blue:#0068cc;--purple:#5500cc;--gold:#7a5500;
+  --green:#006e3a;--red:#bb0033;--orange:#b45000;
   --text:#1e2340;--text-dim:#6270a0;--text-bright:#0a0d1f;
 }
+/* ── LIGHT MODE — fix hardcoded neon colors ── */
+body.light .stat-STR .stat-val{color:#c0300a;}
+body.light .stat-STR .stat-bar{background:#c0300a;}
+body.light .stat-INT .stat-val{color:#0055aa;}
+body.light .stat-INT .stat-bar{background:#0055aa;}
+body.light .stat-END .stat-val{color:#006e3a;}
+body.light .stat-END .stat-bar{background:#006e3a;}
+body.light .stat-WIL .stat-val{color:#6600bb;}
+body.light .stat-WIL .stat-bar{background:#6600bb;}
+body.light .stat-AGI .stat-val{color:#8a6000;}
+body.light .stat-AGI .stat-bar{background:#8a6000;}
+body.light .ev-workout{background:rgba(180,60,0,.12);color:#b43c00;border-left-color:#b43c00;}
+body.light .ev-study{background:rgba(0,85,170,.12);color:#0055aa;border-left-color:#0055aa;}
+body.light .ev-health{background:rgba(0,110,58,.12);color:#006e3a;border-left-color:#006e3a;}
+body.light .ev-work{background:rgba(122,85,0,.12);color:#7a5500;border-left-color:#7a5500;}
+body.light .ev-personal{background:rgba(85,0,204,.12);color:#5500cc;border-left-color:#5500cc;}
+body.light .ev-quest{background:rgba(180,80,0,.12);color:#b45000;border-left-color:#b45000;}
+body.light .ev-habit{background:rgba(100,0,180,.12);color:#6400b4;border-left-color:#6400b4;}
+body.light .ev-deadline{background:rgba(187,0,51,.12);color:#bb0033;border-left-color:#bb0033;}
+body.light .habit-chip.done{background:rgba(0,110,58,.15);color:#006e3a;border-left-color:#006e3a;}
+body.light .habit-chip.pending{background:rgba(85,0,204,.12);color:#5500cc;border-left-color:#5500cc;}
+body.light .habit-chip.rest{background:rgba(0,104,204,.12);color:#0068cc;border-left-color:#0068cc;}
+body.light .quest-deadline-pill.grace{background:rgba(122,85,0,.15);color:#7a5500;border-left-color:#7a5500;}
+body.light .quest-deadline-pill.urgent{background:rgba(187,0,51,.15);color:#bb0033;border-left-color:#bb0033;}
+body.light .quest-deadline-pill.normal{background:rgba(180,80,0,.15);color:#b45000;border-left-color:#b45000;}
+body.light .tag-xp{background:rgba(0,110,58,.12);color:#006e3a;border-color:rgba(0,110,58,.4);}
+body.light .tag-pen{background:rgba(187,0,51,.1);color:#bb0033;border-color:rgba(187,0,51,.4);}
+body.light .habit-done-mark{color:#006e3a;border-color:rgba(0,110,58,.4);}
+body.light .habit-rest-mark{color:#0068cc;border-color:rgba(0,104,204,.4);}
+body.light .habit-frozen-mark{color:#0068cc;border-color:rgba(0,104,204,.4);}
+body.light .habit-streak{color:#7a5500;}
+body.light .habit-streak.zero{color:#bb0033;}
+body.light .quest-xp{color:#7a5500;}
+body.light .diff-1{background:rgba(0,110,58,.12);color:#006e3a;border-color:rgba(0,110,58,.4);}
+body.light .diff-2{background:rgba(0,104,204,.1);color:#0068cc;border-color:rgba(0,104,204,.4);}
+body.light .diff-3{background:rgba(122,85,0,.12);color:#7a5500;border-color:rgba(122,85,0,.4);}
+body.light .diff-4{background:rgba(180,80,0,.12);color:#b45000;border-color:rgba(180,80,0,.4);}
+body.light .diff-5{background:rgba(187,0,51,.12);color:#bb0033;border-color:rgba(187,0,51,.4);}
+body.light .lsc-streak{color:#7a5500;}
+body.light .lsc-done{background:rgba(0,110,58,.1);color:#006e3a;border-color:rgba(0,110,58,.3);}
+body.light .lsc-pending{background:rgba(85,0,204,.1);color:#5500cc;border-color:rgba(85,0,204,.3);}
+body.light .t-badge{border-color:#7a5500;color:#7a5500;}
+body.light .t-pos{border-color:#006e3a;color:#006e3a;}
+body.light .t-neg{border-color:#bb0033;color:#bb0033;}
+body.light .t-info{border-color:#0068cc;color:#0068cc;}
+body.light .badge-card.unlocked{border-color:rgba(122,85,0,.5);}
+body.light .badge-card.unlocked .badge-name{color:#7a5500;}
+body.light .badge-card.unlocked .badge-hint{color:#7a5500;}
+body.light .badge-date{color:#7a5500;}
+body.light .history-xp.pos{color:#006e3a;}
+body.light .history-xp.neg{color:#bb0033;}
+body.light .history-item.pos{border-left-color:#006e3a;}
+body.light .history-item.neg{border-left-color:#bb0033;}
+body.light #freeze-count{color:#0068cc;}
+body.light #hunter-title{color:#7a5500;}
+body.light .xp-preview{color:#7a5500;}
+body.light #cal-today-xp{color:#7a5500;}
+body.light .ag-xp{color:#7a5500;}
+body.light .dv-ev-xp{color:#7a5500;}
+body.light .quest-grace{color:#7a5500;border-color:rgba(122,85,0,.3);background:rgba(122,85,0,.05);}
+body.light #day-xp-show{color:#7a5500;}
+body.light .freeze-cost{color:#0068cc;background:rgba(0,104,204,.06);}
+body.light .sec-title::before{box-shadow:none;}
+body.light #xp-bar{box-shadow:none;}
+body.light .deadline-info{background:rgba(187,0,51,.05);border-color:rgba(187,0,51,.2);color:#bb0033;}
+body.light #edp-deadline{background:rgba(187,0,51,.05);border-color:rgba(187,0,51,.2);color:#bb0033;}
+body.light #lu-text{color:#7a5500;text-shadow:0 0 20px rgba(122,85,0,.4);}
+body.light #ru-text{color:#5500cc;text-shadow:0 0 20px rgba(85,0,204,.3);}
+body.light .notif-item.quest{border-left-color:#7a5500;}
+body.light .notif-item.habit{border-left-color:#5500cc;}
+body.light .notif-item.urgent{border-left-color:#bb0033;}
+body.light #bell-btn.has-items{border-color:#7a5500;color:#7a5500;}
+body.light .mc-cell.mc-has::after{background:#7a5500;}
+body.light .mc-cell.mc-sel{color:#7a5500;border-color:rgba(122,85,0,.4);}
 /* ── RESET ── */
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
