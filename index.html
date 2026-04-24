@@ -937,12 +937,11 @@ function loadSecStates(){
 const todayStr=()=>new Date().toDateString();
 const yesterStr=()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toDateString();};
 const todayDOW=()=>new Date().getDay();
-//const fmtDate=d=>d.toISOString().slice(0,10);
 const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const parseDate=s=>{const[y,m,dd]=s.split('-');return new Date(+y,+m-1,+dd);};
 const sameDay=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
 const isRestDay=h=>(h.restDays||[]).includes(todayDOW());
-const wasRestOn=(h,ds)=>(h.restDays||[]).includes(new Date(ds).getDay());
+const wasRestOn=(h,ds)=>(h.restDays||[]).includes(parseDate(ds).getDay());
 
 // ═══════════════════════════════════════════════════════
 // TAB / VIEW
@@ -1524,7 +1523,7 @@ function showEOD(){
 // ═══════════════════════════════════════════════════════
 function calMonthDays(year,month){
   const first=new Date(year,month,1),last=new Date(year,month+1,0),startDow=first.getDay(),days=[];
-  for(let i=startDow-1;i>=0;i--){const d=new Date(year,month,-i);days.push({date:d,thisMonth:false});}
+  for(let i=startDow;i>0;i--){const d=new Date(year,month,1-i);days.push({date:d,thisMonth:false});}
   for(let d=1;d<=last.getDate();d++)days.push({date:new Date(year,month,d),thisMonth:true});
   while(days.length%7!==0){const l=days[days.length-1].date,n=new Date(l);n.setDate(l.getDate()+1);days.push({date:n,thisMonth:false});}
   return days;
