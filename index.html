@@ -538,6 +538,33 @@ body.light #auth-box button{color:#fff;}
 .conflict-card .ctitle{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;color:var(--blue);margin-bottom:8px;}
 .conflict-card .cstat{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-dim);margin:3px 0;}
 @media(max-width:600px){.conflict-cards{grid-template-columns:1fr;}}
+
+/* ═══ MOBILE FIX — popups must not overflow viewport ═══ */
+@media(max-width:560px){
+  /* Notification bell panel — anchor to viewport, not the bell */
+  #notif-panel{
+    position:fixed;
+    top:auto;
+    bottom:12px;
+    left:8px;
+    right:8px;
+    width:auto;
+    max-width:none;
+    max-height:70vh;
+  }
+  /* Sync pill dropdown menu — same treatment */
+  #sync-menu{
+    position:fixed;
+    top:auto;
+    bottom:12px;
+    left:8px;
+    right:8px;
+    min-width:0;
+    max-width:none;
+    max-height:70vh;
+    overflow-y:auto;
+  }
+}
 </style>
 </head>
 <body>
