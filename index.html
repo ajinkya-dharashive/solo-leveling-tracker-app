@@ -490,9 +490,94 @@ body.light #g-header{background:rgba(244,246,252,.97);}
 @media(max-width:900px){.cal-layout{grid-template-columns:1fr;}.cal-sidebar{display:grid;grid-template-columns:1fr 1fr;}}
 @media(max-width:700px){#stats-grid{grid-template-columns:repeat(3,1fr);}#weight-layout{grid-template-columns:1fr;}.cal-sidebar{grid-template-columns:1fr;}#edp{right:10px;left:10px;width:auto;}.field-row{grid-template-columns:1fr;}}
 @media(max-width:560px){#tab-bar{width:100%;border-top:1px solid var(--border);}#xp-section{min-width:100%;order:10;}#h-right{margin-left:auto;}}
+
+/* ═══ SUPABASE SYNC UI ═══ */
+#auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+#auth-overlay.hidden{display:none;}
+#auth-box{background:var(--card,var(--panel));border:1px solid var(--border);border-radius:6px;padding:32px 28px;max-width:420px;width:100%;box-shadow:0 0 40px rgba(0,212,255,.15);}
+#auth-box h2{font-family:'Orbitron',sans-serif;font-size:18px;letter-spacing:3px;color:var(--blue);margin:0 0 6px 0;text-align:center;}
+#auth-box .auth-sub{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-dim);text-align:center;letter-spacing:2px;margin-bottom:24px;}
+#auth-box label{display:block;font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--text-dim);letter-spacing:2px;margin-bottom:6px;margin-top:14px;font-weight:700;}
+#auth-box input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:4px;font-family:'Rajdhani',sans-serif;font-size:14px;box-sizing:border-box;}
+#auth-box input:focus{border-color:var(--blue);outline:none;}
+#auth-box button{width:100%;margin-top:20px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;color:#fff;padding:12px;border-radius:4px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .2s;text-shadow:0 1px 2px rgba(0,0,0,.4);}
+#auth-box button:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,212,255,.3);}
+#auth-box button:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+body.light #auth-box button{color:#fff;}
+#auth-error{margin-top:14px;padding:8px 10px;background:rgba(255,51,102,.1);border:1px solid rgba(255,51,102,.3);border-radius:4px;color:var(--red);font-family:'Rajdhani',sans-serif;font-size:11px;display:none;}
+#auth-error.show{display:block;}
+.auth-hint{margin-top:18px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;}
+
+#sync-pill-wrap{position:relative;display:inline-block;}
+#sync-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;font-family:'Rajdhani',sans-serif;font-size:9px;letter-spacing:1.5px;color:var(--text-dim);font-weight:700;cursor:pointer;transition:all .2s;user-select:none;}
+#sync-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--text-dim);}
+#sync-pill.synced .dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+#sync-pill.syncing .dot{background:var(--blue);animation:syncpulse 1s ease-in-out infinite;}
+#sync-pill.error .dot{background:var(--red);}
+#sync-pill.offline .dot{background:#888;}
+@keyframes syncpulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+#sync-pill:hover{border-color:var(--blue);color:var(--text);}
+
+#sync-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:180px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:9000;display:none;overflow:hidden;}
+#sync-menu.open{display:block;}
+.sync-menu-item{display:flex;align-items:center;gap:8px;padding:9px 12px;font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:1.5px;color:var(--text);cursor:pointer;border:none;background:none;width:100%;text-align:left;border-bottom:1px solid var(--border);font-weight:700;transition:background .15s;}
+.sync-menu-item:last-child{border-bottom:none;}
+.sync-menu-item:hover{background:rgba(0,212,255,.08);color:var(--blue);}
+.sync-menu-item.danger:hover{background:rgba(255,51,102,.1);color:var(--red);}
+.sync-menu-info{padding:9px 12px;font-family:'Rajdhani',sans-serif;font-size:10px;color:var(--text-dim);letter-spacing:1px;border-bottom:1px solid var(--border);}
+.sync-menu-info b{color:var(--text);font-weight:700;display:block;margin-bottom:2px;}
+
+#conflict-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);backdrop-filter:blur(8px);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px;}
+#conflict-modal.hidden{display:none;}
+#conflict-box{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:28px;max-width:520px;width:100%;}
+#conflict-box h2{font-family:'Orbitron',sans-serif;font-size:14px;letter-spacing:3px;color:var(--red);margin:0 0 16px 0;text-align:center;}
+#conflict-box p{font-family:'Rajdhani',sans-serif;font-size:13px;color:var(--text);line-height:1.6;margin:8px 0;}
+.conflict-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0;}
+.conflict-card{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:14px;cursor:pointer;transition:all .2s;}
+.conflict-card:hover{border-color:var(--blue);transform:translateY(-2px);}
+.conflict-card .ctitle{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;color:var(--blue);margin-bottom:8px;}
+.conflict-card .cstat{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-dim);margin:3px 0;}
+@media(max-width:600px){.conflict-cards{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
+
+<!-- ═══ AUTH OVERLAY ═══ -->
+<div id="auth-overlay" class="hidden">
+  <div id="auth-box">
+    <h2>HUNTER OS</h2>
+    <div class="auth-sub">SYSTEM ACCESS REQUIRED</div>
+    <label for="auth-email">EMAIL</label>
+    <input type="email" id="auth-email" autocomplete="email" />
+    <label for="auth-password">PASSWORD</label>
+    <input type="password" id="auth-password" autocomplete="current-password" />
+    <div id="auth-error"></div>
+    <button id="auth-submit">⚡ AUTHENTICATE</button>
+    <div class="auth-hint">Accounts are issued by the System Administrator.</div>
+  </div>
+</div>
+
+<!-- ═══ CONFLICT MODAL ═══ -->
+<div id="conflict-modal" class="hidden">
+  <div id="conflict-box">
+    <h2>⚠ DATA CONFLICT DETECTED</h2>
+    <p>Cloud and local data both exist. Choose which version to keep — the other will be overwritten.</p>
+    <div class="conflict-cards">
+      <div class="conflict-card" onclick="syncResolveConflict('cloud')">
+        <div class="ctitle">☁ USE CLOUD</div>
+        <div class="cstat" id="cf-cloud-date">—</div>
+        <div class="cstat" id="cf-cloud-level">—</div>
+        <div class="cstat" id="cf-cloud-xp">—</div>
+      </div>
+      <div class="conflict-card" onclick="syncResolveConflict('local')">
+        <div class="ctitle">💾 USE LOCAL</div>
+        <div class="cstat" id="cf-local-date">—</div>
+        <div class="cstat" id="cf-local-level">—</div>
+        <div class="cstat" id="cf-local-xp">—</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
 <div id="g-header">
@@ -518,6 +603,20 @@ body.light #g-header{background:rgba(244,246,252,.97);}
         <div id="notif-panel">
           <div class="notif-hdr">BRIEFING <button class="notif-clear" onclick="dismissAllNotifs()">CLEAR</button></div>
           <div class="notif-list" id="notif-list"></div>
+        </div>
+      </div>
+      <div id="sync-pill-wrap">
+        <div id="sync-pill" class="offline" onclick="syncMenuClick(event)">
+          <span class="dot"></span><span id="sync-pill-text">OFFLINE</span>
+        </div>
+        <div id="sync-menu">
+          <div class="sync-menu-info" id="sync-menu-info">
+            <b id="sync-menu-user">—</b>
+            <span id="sync-menu-last">Not synced yet</span>
+          </div>
+          <button class="sync-menu-item" onclick="syncMenuAction('push')">⬆ FORCE PUSH</button>
+          <button class="sync-menu-item" onclick="syncMenuAction('pull')">⬇ FORCE PULL</button>
+          <button class="sync-menu-item danger" onclick="syncMenuAction('logout')">⏻ LOGOUT</button>
         </div>
       </div>
       <button id="theme-toggle" onclick="toggleTheme()">☀ LIGHT</button>
@@ -1210,9 +1309,27 @@ function openQuestModal(){
 }
 function setRadio(gid,val){document.querySelectorAll(`#${gid} .radio-btn`).forEach(b=>b.classList.toggle('active',b.dataset.val===val));}
 function getRadio(gid){for(const b of document.querySelectorAll(`#${gid} .radio-btn`))if(b.classList.contains('active'))return b.dataset.val;return null;}
-function updateQXPPreview(gid,pid){const el=document.getElementById(pid);if(el)el.textContent=getQXP(getRadio(gid)||1);}
-document.getElementById('q-diff-grp').addEventListener('click',()=>updateQXPPreview('q-diff-grp','q-xp-preview'));
-document.getElementById('eq-diff-grp').addEventListener('click',()=>updateQXPPreview('eq-diff-grp','eq-xp-preview'));
+function updateQXPPreview(gid,pid){
+  const d=parseInt(getRadio(gid))||1;
+  const el=document.getElementById(pid);if(el)el.textContent=getQXP(d);
+  // also update the difficulty name label (q-diff-label or eq-diff-label)
+  const labelId=gid.replace('-grp','-label');
+  const lbl=document.getElementById(labelId);if(lbl)lbl.textContent=DIFF_NAMES[d]||'Easy';
+}
+// Synchronously update active class + preview on click. This avoids a race
+// with the global radio-group click handler later in the file (timing of
+// setTimeout vs bubbling order was causing the "two clicks needed" bug).
+function _wireDiffGroup(gid,pid){
+  const grp=document.getElementById(gid);if(!grp)return;
+  grp.addEventListener('click',e=>{
+    const btn=e.target.closest('.radio-btn');if(!btn||!grp.contains(btn))return;
+    grp.querySelectorAll('.radio-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    updateQXPPreview(gid,pid);
+  });
+}
+_wireDiffGroup('q-diff-grp','q-xp-preview');
+_wireDiffGroup('eq-diff-grp','eq-xp-preview');
 function createQuest(){
   const t=document.getElementById('q-title').value.trim();if(!t){toast('Quest needs a title!','neg');return;}
   const d=parseInt(getRadio('q-diff-grp'))||1,rec=document.getElementById('q-recurring').checked;
@@ -1890,7 +2007,349 @@ function init(){
   setInterval(()=>{renderQuests();updateBell();checkEOD();},30000);
   if(!G.hunter.lastActiveDate)setTimeout(()=>toast('Welcome, Hunter. The System awaits.','info'),700);
 }
-init();
+// init() is now called by the Supabase sync layer after authentication.
+</script>
+<!-- ═══════════════════════════════ SUPABASE SYNC LAYER ═══════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  // ─── CONFIG ─────────────────────────────────────────────────────────
+  const SUPABASE_URL = 'https://rgojqwywhpzmnnoaslfe.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnb2pxd3l3aHB6bW5ub2FzbGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMDUyODksImV4cCI6MjA5MjY4MTI4OX0.gKO_OUbHlN8NRZ-eSqT2vvuolq4nMx-d2D7ZG0BxI3Q';
+  const TABLE = 'user_data';
+  const LOCAL_KEY = 'hos4';
+  const LOCAL_META_KEY = 'hos_sync_meta'; // tracks last cloud sync timestamp
+  const DEBOUNCE_MS = 2000;
+
+  // ─── STATE ──────────────────────────────────────────────────────────
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let currentUser = null;
+  let pushTimer = null;
+  let isSyncing = false;
+  let pendingResolve = null; // for conflict resolution promise
+
+  // expose for debugging
+  window.__sb = sb;
+
+  // ─── UI HELPERS ─────────────────────────────────────────────────────
+  function setPill(state, text){
+    const pill = document.getElementById('sync-pill');
+    const txt  = document.getElementById('sync-pill-text');
+    if(!pill) return;
+    pill.classList.remove('synced','syncing','error','offline');
+    pill.classList.add(state);
+    if(txt) txt.textContent = text;
+  }
+  function showAuth(){ document.getElementById('auth-overlay').classList.remove('hidden'); }
+  function hideAuth(){ document.getElementById('auth-overlay').classList.add('hidden'); }
+  function showAuthError(msg){
+    const e = document.getElementById('auth-error');
+    e.textContent = msg; e.classList.add('show');
+  }
+  function clearAuthError(){
+    document.getElementById('auth-error').classList.remove('show');
+  }
+
+  // ─── META (last-sync tracking) ──────────────────────────────────────
+  function getMeta(){
+    try{ return JSON.parse(localStorage.getItem(LOCAL_META_KEY)||'{}'); }catch(e){ return {}; }
+  }
+  function setMeta(m){
+    localStorage.setItem(LOCAL_META_KEY, JSON.stringify(m));
+  }
+
+  // ─── LOAD/SAVE WRAPPERS ─────────────────────────────────────────────
+  // Reads the localStorage blob (whatever load() would parse)
+  function readLocalRaw(){
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if(!raw) return null;
+    try{ return JSON.parse(raw); }catch(e){ return null; }
+  }
+  // Pushes the latest local state to cloud.
+  // We read from localStorage rather than window.G because the app uses
+  // `let G = {...}` at script top-level, which is block-scoped and NOT
+  // attached to window. localStorage is always up to date because save()
+  // writes to it synchronously before our debounced push fires.
+  async function pushToCloud(){
+    if(!currentUser) return;
+    const raw = localStorage.getItem(LOCAL_KEY);
+    if(!raw) return;
+    let payload;
+    try{ payload = JSON.parse(raw); }
+    catch(e){ console.error('[sync] local data corrupt, skipping push', e); return; }
+    isSyncing = true; setPill('syncing','SYNCING');
+    try{
+      const now = new Date().toISOString();
+      const { error } = await sb.from(TABLE).upsert({
+        user_id: currentUser.id,
+        data: payload,
+        updated_at: now
+      }, { onConflict: 'user_id' });
+      if(error) throw error;
+      setMeta({ lastPush: now, userId: currentUser.id });
+      setPill('synced','SYNCED');
+    }catch(err){
+      console.error('[sync] push failed', err);
+      setPill('error','SYNC ERR');
+    }finally{
+      isSyncing = false;
+    }
+  }
+  // Fetches cloud row for current user
+  async function fetchCloud(){
+    if(!currentUser) return null;
+    const { data, error } = await sb
+      .from(TABLE)
+      .select('data, updated_at')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    if(error){ console.error('[sync] fetch failed', error); throw error; }
+    return data; // null if no row
+  }
+
+  // ─── DEBOUNCED SAVE WRAPPER ─────────────────────────────────────────
+  // We wrap the existing save() defined in the main script.
+  function installSaveWrapper(){
+    if(typeof window.save !== 'function'){
+      console.warn('[sync] window.save not found — wrapper not installed');
+      return;
+    }
+    const originalSave = window.save;
+    window.save = function(){
+      originalSave.apply(this, arguments); // keep localStorage write intact
+      if(!currentUser) return;             // not logged in → just local
+      if(pushTimer) clearTimeout(pushTimer);
+      setPill('syncing','PENDING');
+      pushTimer = setTimeout(()=>{
+        pushTimer = null;
+        pushToCloud();
+      }, DEBOUNCE_MS);
+    };
+  }
+
+  // ─── BOOT SEQUENCE ──────────────────────────────────────────────────
+  // After successful auth, decide what to do with cloud vs local data, then run the app's init()
+  async function bootApp(){
+    setPill('syncing','LOADING');
+    let cloudRow = null;
+    try{ cloudRow = await fetchCloud(); }
+    catch(e){ /* network / RLS issue — fall back to local */ }
+
+    const localRaw = readLocalRaw();
+    const meta = getMeta();
+    const sameUser = meta.userId === currentUser.id;
+
+    // Case A: no cloud row, no local data → fresh start
+    if(!cloudRow && !localRaw){
+      finishBoot('fresh');
+      // After init(), push the empty fresh state up so a row exists
+      setTimeout(()=>pushToCloud(), 500);
+      return;
+    }
+    // Case B: cloud exists, local empty (or different user) → use cloud
+    if(cloudRow && (!localRaw || !sameUser)){
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(cloudRow.data));
+      setMeta({ lastPush: cloudRow.updated_at, userId: currentUser.id });
+      finishBoot('cloud');
+      return;
+    }
+    // Case C: local exists, no cloud row → push local up (first-login migration)
+    if(!cloudRow && localRaw){
+      finishBoot('local-migrate');
+      setTimeout(()=>pushToCloud(), 500); // after init reads local
+      return;
+    }
+    // Case D: both exist — compare
+    // If meta.lastPush matches cloud.updated_at → local has unsynced edits → push local
+    // If they differ → real conflict → ask user
+    // Compare as milliseconds: Postgres may serialize the same instant slightly
+    // differently than the JS-emitted ISO string (e.g. "+00:00" vs "Z"), so
+    // a string === string check would produce false negatives.
+    const sameTs = meta.lastPush && cloudRow.updated_at &&
+                   new Date(meta.lastPush).getTime() === new Date(cloudRow.updated_at).getTime();
+    if(cloudRow && localRaw && sameUser && sameTs){
+      finishBoot('local');
+      setTimeout(()=>pushToCloud(), 500);
+      return;
+    }
+    // Real conflict
+    showConflictModal(cloudRow, localRaw);
+  }
+
+  function finishBoot(mode){
+    hideAuth();
+    setPill('synced','SYNCED');
+    // Now run the app's normal init() — it will read whatever is in localStorage
+    if(typeof window.init === 'function'){
+      window.init();
+    }
+  }
+
+  // ─── CONFLICT RESOLUTION ────────────────────────────────────────────
+  function showConflictModal(cloudRow, localData){
+    const fmt = iso => { try{ return new Date(iso).toLocaleString(); }catch(e){ return '—'; } };
+    const cloud = cloudRow.data || {};
+    const local = localData || {};
+    document.getElementById('cf-cloud-date').textContent  = 'Updated: ' + fmt(cloudRow.updated_at);
+    document.getElementById('cf-cloud-level').textContent = 'Level: ' + (cloud.hunter?.level ?? '?');
+    document.getElementById('cf-cloud-xp').textContent    = 'Total XP: ' + (cloud.hunter?.totalXP ?? '?');
+    document.getElementById('cf-local-date').textContent  = 'Last sync: ' + (getMeta().lastPush ? fmt(getMeta().lastPush) : 'never');
+    document.getElementById('cf-local-level').textContent = 'Level: ' + (local.hunter?.level ?? '?');
+    document.getElementById('cf-local-xp').textContent    = 'Total XP: ' + (local.hunter?.totalXP ?? '?');
+    // stash for resolver
+    window.__conflictCloud = cloudRow;
+    window.__conflictLocal = localData;
+    document.getElementById('conflict-modal').classList.remove('hidden');
+  }
+  window.syncResolveConflict = function(choice){
+    const cloudRow = window.__conflictCloud;
+    if(choice === 'cloud'){
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(cloudRow.data));
+      setMeta({ lastPush: cloudRow.updated_at, userId: currentUser.id });
+      document.getElementById('conflict-modal').classList.add('hidden');
+      finishBoot('cloud-resolved');
+    } else {
+      // keep local — overwrite cloud
+      document.getElementById('conflict-modal').classList.add('hidden');
+      finishBoot('local-resolved');
+      setTimeout(()=>pushToCloud(), 500);
+    }
+  };
+
+  // ─── AUTH FLOW ──────────────────────────────────────────────────────
+  async function handleLogin(){
+    clearAuthError();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    if(!email || !password){ showAuthError('Email and password required.'); return; }
+    const btn = document.getElementById('auth-submit');
+    btn.disabled = true; btn.textContent = '⚡ AUTHENTICATING...';
+    try{
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      currentUser = data.user;
+      installSaveWrapper();
+      await bootApp();
+    }catch(err){
+      showAuthError(err.message || 'Authentication failed.');
+      btn.disabled = false; btn.textContent = '⚡ AUTHENTICATE';
+    }
+  }
+  async function handleLogout(){
+    // flush any pending push before logging out
+    if(pushTimer){ clearTimeout(pushTimer); pushTimer = null; await pushToCloud(); }
+    await sb.auth.signOut();
+    location.reload();
+  }
+
+  // ─── SYNC PILL DROPDOWN MENU ───────────────────────────────────────
+  function closeSyncMenu(){
+    document.getElementById('sync-menu').classList.remove('open');
+  }
+  function openSyncMenu(){
+    // Refresh menu info first
+    const userEl = document.getElementById('sync-menu-user');
+    const lastEl = document.getElementById('sync-menu-last');
+    if(currentUser){
+      userEl.textContent = currentUser.email || 'Hunter';
+      const meta = getMeta();
+      if(meta.lastPush){
+        const d = new Date(meta.lastPush);
+        const ago = Math.round((Date.now() - d.getTime())/1000);
+        let agoTxt;
+        if(ago < 60) agoTxt = ago + 's ago';
+        else if(ago < 3600) agoTxt = Math.round(ago/60) + 'm ago';
+        else if(ago < 86400) agoTxt = Math.round(ago/3600) + 'h ago';
+        else agoTxt = Math.round(ago/86400) + 'd ago';
+        lastEl.textContent = 'Synced ' + agoTxt;
+      } else {
+        lastEl.textContent = 'Not synced yet';
+      }
+    } else {
+      userEl.textContent = '—';
+      lastEl.textContent = 'Not signed in';
+    }
+    document.getElementById('sync-menu').classList.add('open');
+  }
+  window.syncMenuClick = function(event){
+    if(event) event.stopPropagation();
+    if(!currentUser){ showAuth(); return; }
+    const menu = document.getElementById('sync-menu');
+    if(menu.classList.contains('open')) closeSyncMenu();
+    else openSyncMenu();
+  };
+  window.syncMenuAction = function(action){
+    closeSyncMenu();
+    if(action === 'push'){
+      if(pushTimer){ clearTimeout(pushTimer); pushTimer = null; }
+      pushToCloud();
+    } else if(action === 'pull'){
+      if(!confirm('Pull cloud data and overwrite local? Unsaved changes will be lost.')) return;
+      (async ()=>{
+        try{
+          setPill('syncing','PULLING');
+          const row = await fetchCloud();
+          if(!row){ alert('No cloud data to pull.'); setPill('synced','SYNCED'); return; }
+          localStorage.setItem(LOCAL_KEY, JSON.stringify(row.data));
+          setMeta({ lastPush: row.updated_at, userId: currentUser.id });
+          location.reload();
+        }catch(e){ setPill('error','PULL ERR'); }
+      })();
+    } else if(action === 'logout'){
+      if(!confirm('Logout? Any pending changes will be pushed first.')) return;
+      handleLogout();
+    }
+  };
+  // Close menu when clicking outside
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById('sync-pill-wrap');
+    if(wrap && !wrap.contains(e.target)){
+      closeSyncMenu();
+    }
+  });
+
+  // ─── ENTRY POINT ────────────────────────────────────────────────────
+  document.getElementById('auth-submit').addEventListener('click', handleLogin);
+  document.getElementById('auth-password').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('auth-email').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') document.getElementById('auth-password').focus();
+  });
+
+  // Check existing session on load
+  (async ()=>{
+    setPill('syncing','CHECKING');
+    const { data: { session } } = await sb.auth.getSession();
+    if(session?.user){
+      currentUser = session.user;
+      installSaveWrapper();
+      await bootApp();
+    } else {
+      setPill('offline','LOGIN');
+      showAuth();
+    }
+  })();
+
+  // Periodic safety push every 60s if there are unflushed changes
+  setInterval(()=>{
+    if(currentUser && pushTimer){
+      clearTimeout(pushTimer); pushTimer = null;
+      pushToCloud();
+    }
+  }, 60000);
+
+  // Push on tab close (best effort)
+  window.addEventListener('beforeunload', ()=>{
+    if(pushTimer && currentUser){
+      // Use sendBeacon-style: just fire and forget
+      clearTimeout(pushTimer);
+      // Note: async upsert may not complete before unload; that's OK because
+      // the next session will detect the unsynced state via meta.lastPush.
+      pushToCloud();
+    }
+  });
+})();
 </script>
 </body>
 </html>
