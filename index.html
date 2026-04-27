@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SYSTEM — Hunter OS</title>
+<title>Hunter OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
 /* ── TOKENS ── */
@@ -539,30 +539,19 @@ body.light #auth-box button{color:#fff;}
 .conflict-card .cstat{font-family:'Rajdhani',sans-serif;font-size:11px;color:var(--text-dim);margin:3px 0;}
 @media(max-width:600px){.conflict-cards{grid-template-columns:1fr;}}
 
-/* ═══ MOBILE FIX — popups must not overflow viewport ═══ */
-@media(max-width:560px){
-  /* Notification bell panel — anchor to viewport, not the bell */
-  #notif-panel{
-    position:fixed;
-    top:auto;
-    bottom:12px;
-    left:8px;
-    right:8px;
-    width:auto;
-    max-width:none;
-    max-height:70vh;
-  }
-  /* Sync pill dropdown menu — same treatment */
+/* On narrow screens, the sync menu (which is not at the rightmost position) 
+   could overflow the left edge. Anchor it to the viewport on small screens. */
+@media(max-width:600px){
   #sync-menu{
-    position:fixed;
-    top:auto;
-    bottom:12px;
-    left:8px;
-    right:8px;
-    min-width:0;
-    max-width:none;
-    max-height:70vh;
-    overflow-y:auto;
+    position:fixed !important;
+    top:auto !important;
+    bottom:12px !important;
+    left:8px !important;
+    right:8px !important;
+    min-width:0 !important;
+    max-width:none !important;
+    max-height:70vh !important;
+    overflow-y:auto !important;
   }
 }
 </style>
@@ -624,14 +613,7 @@ body.light #auth-box button{color:#fff;}
     </div>
     <div id="h-right">
       <div id="freeze-box">🧊 <span id="freeze-count">0</span></div>
-      <div id="bell-wrap">
-        <button id="bell-btn" onclick="toggleNotifPanel()">🔔</button>
-        <div id="bell-badge" class="hidden">0</div>
-        <div id="notif-panel">
-          <div class="notif-hdr">BRIEFING <button class="notif-clear" onclick="dismissAllNotifs()">CLEAR</button></div>
-          <div class="notif-list" id="notif-list"></div>
-        </div>
-      </div>
+      <button id="theme-toggle" onclick="toggleTheme()">☀ LIGHT</button>
       <div id="sync-pill-wrap">
         <div id="sync-pill" class="offline" onclick="syncMenuClick(event)">
           <span class="dot"></span><span id="sync-pill-text">OFFLINE</span>
@@ -646,7 +628,14 @@ body.light #auth-box button{color:#fff;}
           <button class="sync-menu-item danger" onclick="syncMenuAction('logout')">⏻ LOGOUT</button>
         </div>
       </div>
-      <button id="theme-toggle" onclick="toggleTheme()">☀ LIGHT</button>
+      <div id="bell-wrap">
+        <button id="bell-btn" onclick="toggleNotifPanel()">🔔</button>
+        <div id="bell-badge" class="hidden">0</div>
+        <div id="notif-panel">
+          <div class="notif-hdr">BRIEFING <button class="notif-clear" onclick="dismissAllNotifs()">CLEAR</button></div>
+          <div class="notif-list" id="notif-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
