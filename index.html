@@ -416,7 +416,7 @@ body.light #g-header{background:rgba(244,246,252,.97);}
 .ev-deadline{background:rgba(255,51,102,.15);color:#ff3366;border-left:2px solid #ff3366;}
 
 /* week / day views */
-.week-col-grid{display:grid;grid-template-columns:44px repeat(7,1fr);min-width:560px;overflow-x:auto;}
+.week-col-grid{display:block;min-width:560px;overflow-x:auto;}
 .wv-time-slot{height:42px;display:flex;align-items:flex-start;justify-content:flex-end;padding-right:6px;padding-top:2px;font-family:'Rajdhani',sans-serif;font-size:8px;letter-spacing:1px;color:var(--text-dim);border-top:1px solid var(--border);}
 .wv-day-col{border-left:1px solid var(--border);}
 .wv-day-hdr{padding:5px 4px;text-align:center;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);z-index:5;}
@@ -803,6 +803,11 @@ body.light #auth-box button{color:#fff;}
       <button class="btn btn-sm" onclick="calNav(-1)">◀</button>
       <button class="btn btn-sm btn-gold" onclick="calGoToday()">TODAY</button>
       <button class="btn btn-sm" onclick="calNav(1)">▶</button>
+      <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
+      <button class="btn btn-sm" onclick="exportICS()">⬇ EXPORT</button>
+      <button class="btn btn-sm" onclick="document.getElementById('ics-import-file').click()">⬆ IMPORT</button>
+      <input type="file" id="ics-import-file" accept=".ics" style="display:none" onchange="importICS(event)">
+      <div style="width:1px;height:20px;background:var(--border);margin:0 4px"></div>
       <button class="btn btn-sm btn-purple" onclick="openAddEventModal()">+ EVENT</button>
     </div>
   </div>
@@ -1077,7 +1082,15 @@ let pendingFreezeHabits=[];
 // ═══════════════════════════════════════════════════════
 // SAVE / LOAD
 // ═══════════════════════════════════════════════════════
-function save(){try{localStorage.setItem('hos4',JSON.stringify(G));}catch(e){}}
+function save(){
+  try{
+    // Persist everything except calEvents (those live in the calendar_events table)
+    const blob={...G,calEvents:undefined};
+    delete blob.calEvents;
+    localStorage.setItem('hos4',JSON.stringify(blob));
+    localStorage.setItem('hos4_cal',JSON.stringify(G.calEvents));
+  }catch(e){}
+}
 function load(){
   try{
     const raw=localStorage.getItem('hos4')||localStorage.getItem('hos3')||localStorage.getItem('hos2');
@@ -1093,13 +1106,31 @@ function load(){
     G.freezeUseCount=d.freezeUseCount||0;
     G.allHabitDayCount=d.allHabitDayCount||0;
     G.titles=d.titles||[];G.equippedTitle=d.equippedTitle||null;
-    // migrate logStreaks → logStreak
     if(d.logStreak)G.logStreak={...G.logStreak,...d.logStreak};
     else if(d.logStreaks?.workout)G.logStreak={...G.logStreak,...d.logStreaks.workout};
     G.weightLog=d.weightLog||[];G.weightUnit=d.weightUnit||'kg';
-    G.calEvents=(d.calEvents||[]).map(e=>({completedDates:[],exceptions:[],...e}));
     G.badges=BADGE_DEFS.map(b=>{const f=(d.badges||[]).find(x=>x.id===b.id);return f||{id:b.id,earned:false,earnedDate:null};});
+    // Load cal events from their own localStorage key (populated by sync layer)
+    const rawCal=localStorage.getItem('hos4_cal');
+    if(rawCal){
+      G.calEvents=JSON.parse(rawCal).map(e=>({completedDates:[],exceptions:[],...e}));
+    } else if(d.calEvents){
+      // Legacy: calEvents were embedded in the main blob — migrate them out
+      G.calEvents=d.calEvents.map(e=>({completedDates:[],exceptions:[],...e}));
+      localStorage.setItem('hos4_cal',JSON.stringify(G.calEvents));
+    }
   }catch(e){console.error(e);}
+}
+// Called whenever a single cal event is created/updated
+function saveCalEventToLocal(ev){
+  G.calEvents=G.calEvents.filter(e=>e.id!==ev.id);
+  G.calEvents.push(ev);
+  localStorage.setItem('hos4_cal',JSON.stringify(G.calEvents));
+}
+// Called whenever a single cal event is deleted
+function deleteCalEventFromLocal(id){
+  G.calEvents=G.calEvents.filter(e=>e.id!==id);
+  localStorage.setItem('hos4_cal',JSON.stringify(G.calEvents));
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1488,7 +1519,8 @@ function logWorkout(){
 function addCalEventFromLog(label,dur){
   const now=new Date(),ds=fmtDate(now),hh=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   const endH=new Date(now.getTime()+dur*60000),endHH=String(endH.getHours()).padStart(2,'0')+':'+String(endH.getMinutes()).padStart(2,'0');
-  G.calEvents.push({id:'cl'+Date.now(),title:label,cat:'workout',xp:0,date:ds,startTime:hh,endTime:endHH,desc:'Logged from Workout Log',recur:'none',recurDays:[],priority:'normal',stat:null,reminder:'none',isDeadline:false,completedDates:[ds],exceptions:[]});
+  const _wlEv={id:'cl'+Date.now(),title:label,cat:'workout',xp:0,date:ds,startTime:hh,endTime:endHH,desc:'Logged from Workout Log',recur:'none',recurDays:[],priority:'normal',stat:null,reminder:'none',isDeadline:false,completedDates:[ds],exceptions:[]};
+  G.calEvents.push(_wlEv);saveCalEventToLocal(_wlEv);if(typeof window.syncCalEvent==='function')window.syncCalEvent(_wlEv);
 }
 // radio group handler
 document.addEventListener('click',e=>{
@@ -1838,28 +1870,51 @@ function calCellClick(ds){calSelectedDate=parseDate(ds);calFocus=calSelectedDate
 
 // ─── WEEK VIEW ───
 function renderWeekCal(){
+  const WV_PPH=42;
   const days=calWeekDays(calFocus),today=new Date();today.setHours(0,0,0,0);
   const s=days[0],e=days[6];document.getElementById('week-label').textContent=MONTH_NAMES[s.getMonth()].slice(0,3)+' '+s.getDate()+' — '+MONTH_NAMES[e.getMonth()].slice(0,3)+' '+e.getDate()+', '+e.getFullYear();
   const HOURS=Array.from({length:24},(_,i)=>i);
-  let html=`<div style="display:flex;flex-direction:column"><div style="height:45px;border-bottom:1px solid var(--border)"></div>`;
-  HOURS.forEach(h=>{const lbl=h===0?'12AM':h<12?h+'AM':h===12?'12PM':(h-12)+'PM';html+=`<div class="wv-time-slot">${lbl}</div>`;});html+='</div>';
-  days.forEach(day=>{const isToday=sameDay(day,today),ds=fmtDate(day);
-    html+=`<div class="wv-day-col${isToday?' today-col':''}"><div class="wv-day-hdr"><div class="wv-day-name">${DAY_NAMES[day.getDay()]}</div><div class="wv-day-num">${day.getDate()}</div></div><div class="wv-slots">`;
-    HOURS.forEach(()=>html+=`<div class="wv-slot-row"></div>`);
+  const totalH=24*WV_PPH;
+
+  // ── Header row (sticky day names) ──
+  let hdr=`<div style="display:grid;grid-template-columns:44px repeat(7,1fr);min-width:560px;position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--border)">`;
+  hdr+=`<div></div>`; // time gutter spacer
+  days.forEach(day=>{
+    const isToday=sameDay(day,today);
+    hdr+=`<div class="wv-day-hdr${isToday?' today-col':''}"><div class="wv-day-name">${DAY_NAMES[day.getDay()]}</div><div class="wv-day-num${isToday?' wv-day-num-today':''}">${day.getDate()}</div></div>`;
+  });
+  hdr+=`</div>`;
+
+  // ── Body row (time gutter + 7 day columns) ──
+  let body=`<div style="display:grid;grid-template-columns:44px repeat(7,1fr);min-width:560px">`;
+
+  // Time gutter
+  body+=`<div style="position:relative;height:${totalH}px">`;
+  HOURS.forEach(h=>{const lbl=h===0?'12AM':h<12?h+'AM':h===12?'12PM':(h-12)+'PM';body+=`<div class="wv-time-slot" style="position:absolute;top:${h*WV_PPH}px;width:44px;height:${WV_PPH}px">${lbl}</div>`;});
+  body+=`</div>`;
+
+  // Day columns
+  days.forEach(day=>{
+    const isToday=sameDay(day,today),ds=fmtDate(day);
+    body+=`<div class="wv-day-col${isToday?' today-col':''}"><div class="wv-slots" style="position:relative;height:${totalH}px">`;
+    HOURS.forEach(h=>body+=`<div class="wv-slot-row" style="position:absolute;top:${h*WV_PPH}px;left:0;right:0;height:${WV_PPH}px"></div>`);
     calEventsForDate(day).filter(ev=>ev.startTime).sort((a,b)=>a.startTime.localeCompare(b.startTime)).forEach(ev=>{
       const[sh=9,sm=0]=(ev.startTime||'09:00').split(':').map(Number),[eh=10,em=0]=(ev.endTime||'10:00').split(':').map(Number);
-      const top=(sh*60+sm)/(24*60)*100,ht=Math.max(((eh*60+em)-(sh*60+sm))/(24*60)*100,2.3);
+      const topPx=(sh*60+sm)*(WV_PPH/60),htPx=Math.max(16,((eh*60+em)-(sh*60+sm))*(WV_PPH/60));
       const cfg=ev.isDeadline?{color:'#ff3366'}:(CAT_EV[ev.cat]||{color:'#888'});const done=calIsComplete(ev,ds);
-      html+=`<div class="wv-event-block" style="top:calc(${top}% + 45px);height:${ht}%;background:${cfg.color}20;border-left:3px solid ${cfg.color};${done?'opacity:.4':''}" onclick="openEDP('${ev.id}','${ds}')"><div class="wv-ev-title" style="color:${cfg.color}">${ev.isDeadline?'🎯 ':ev.title}</div><div class="wv-ev-time">${ev.startTime}</div></div>`;
+      body+=`<div class="wv-event-block" style="top:${topPx}px;height:${htPx}px;background:${cfg.color}20;border-left:3px solid ${cfg.color};${done?'opacity:.4':''}" onclick="openEDP('${ev.id}','${ds}')"><div class="wv-ev-title" style="color:${cfg.color}">${ev.isDeadline?'🎯 ':ev.title}</div><div class="wv-ev-time">${ev.startTime}</div></div>`;
     });
-    if(isToday){const now=new Date(),pct=(now.getHours()*60+now.getMinutes())/(24*60)*100;html+=`<div class="wv-now-line" style="top:calc(${pct}% + 45px)"></div>`;}
-    html+=`</div></div>`;
+    if(isToday){const now=new Date(),topPx=(now.getHours()*60+now.getMinutes())*(WV_PPH/60);body+=`<div class="wv-now-line" style="top:${topPx}px"></div>`;}
+    body+=`</div></div>`;
   });
-  document.getElementById('week-col-grid').innerHTML=html;
+  body+=`</div>`;
+
+  document.getElementById('week-col-grid').innerHTML=hdr+body;
 }
 
 // ─── DAY VIEW ───
 function renderDayCal(){
+  const DV_PPH=46;
   const day=calFocus,ds=fmtDate(day);
   document.getElementById('day-view-label').textContent=DAY_NAMES[day.getDay()]+', '+MONTH_NAMES[day.getMonth()].slice(0,3)+' '+day.getDate()+', '+day.getFullYear();
   document.getElementById('day-xp-show').textContent=`⚡ ${calXPForDate(day)} XP EARNED`;
@@ -1873,11 +1928,24 @@ function renderDayCal(){
   const HOURS=Array.from({length:24},(_,i)=>i);
   const noTime=evs.filter(ev=>!ev.startTime);
   if(noTime.length){html+=`<div class="dv-row"><div class="dv-time" style="font-size:7px">ALL DAY</div><div class="dv-slot">${noTime.map(ev=>{const cfg=ev.isDeadline?{color:'#ff3366',icon:'🎯',label:'DEADLINE'}:(CAT_EV[ev.cat]||{color:'#888'});const done=calIsComplete(ev,ds);return`<div class="dv-ev-card${done?' dv-ev-done':''}" style="border-left-color:${cfg.color}" onclick="openEDP('${ev.id}','${ds}')"><div class="dv-ev-title" style="color:${cfg.color}">${cfg.icon||''} ${ev.title}</div><div class="dv-ev-meta">All day</div><div class="dv-ev-xp">${done?'✓':'+'}${ev.xp||0}</div></div>`;}).join('')}</div></div>`;}
-  HOURS.forEach(h=>{const lbl=h===0?'12 AM':h<12?h+' AM':h===12?'12 PM':(h-12)+' PM';const hEvs=evs.filter(ev=>parseInt((ev.startTime||'09:00').split(':')[0])===h&&ev.startTime);
-    html+=`<div class="dv-row"><div class="dv-time">${lbl}</div><div class="dv-slot" onclick="openAddEventModal('${ds}','${String(h).padStart(2,'0')}:00')">
-    ${hEvs.map(ev=>{const cfg=ev.isDeadline?{color:'#ff3366',icon:'🎯',label:'DEADLINE'}:(CAT_EV[ev.cat]||{color:'#888'});const done=calIsComplete(ev,ds);return`<div class="dv-ev-card${done?' dv-ev-done':''}" style="border-left-color:${cfg.color}" onclick="openEDP('${ev.id}','${ds}');event.stopPropagation()"><div class="dv-ev-title" style="color:${cfg.color}">${cfg.icon||''} ${ev.title}</div><div class="dv-ev-meta">${ev.startTime}→${ev.endTime||'?'} · ${cfg.label||''}</div><div class="dv-ev-xp">${done?'✓':'+'}${ev.xp||0}</div></div>`;}).join('')}
-    </div></div>`;
+  // Scrollable absolute-positioned timeline
+  const timedEvs=evs.filter(ev=>ev.startTime);
+  const totalH=24*DV_PPH;
+  html+=`<div style="display:grid;grid-template-columns:44px 1fr">`;
+  // Time labels column
+  html+=`<div style="position:relative;height:${totalH}px">`;
+  HOURS.forEach(h=>{const lbl=h===0?'12 AM':h<12?h+' AM':h===12?'12 PM':(h-12)+' PM';html+=`<div class="dv-time" style="position:absolute;top:${h*DV_PPH}px;width:44px">${lbl}</div>`;});
+  html+=`</div>`;
+  // Events column
+  html+=`<div style="position:relative;height:${totalH}px;border-left:1px solid var(--border)">`;
+  HOURS.forEach(h=>html+=`<div class="dv-slot" style="position:absolute;top:${h*DV_PPH}px;left:0;right:0;height:${DV_PPH}px;padding:0" onclick="openAddEventModal('${ds}','${String(h).padStart(2,'0')}:00')"></div>`);
+  timedEvs.forEach(ev=>{
+    const[sh=9,sm=0]=(ev.startTime||'09:00').split(':').map(Number),[eh=10,em=0]=(ev.endTime||'10:00').split(':').map(Number);
+    const topPx=(sh*60+sm)*(DV_PPH/60),htPx=Math.max(20,((eh*60+em)-(sh*60+sm))*(DV_PPH/60));
+    const cfg=ev.isDeadline?{color:'#ff3366',icon:'🎯',label:'DEADLINE'}:(CAT_EV[ev.cat]||{color:'#888'});const done=calIsComplete(ev,ds);
+    html+=`<div class="dv-ev-card${done?' dv-ev-done':''}" style="position:absolute;top:${topPx}px;height:${htPx}px;left:3px;right:3px;border-left-color:${cfg.color};overflow:hidden;margin:0;z-index:2" onclick="openEDP('${ev.id}','${ds}');event.stopPropagation()"><div class="dv-ev-title" style="color:${cfg.color}">${cfg.icon||''} ${ev.title}</div><div class="dv-ev-meta">${ev.startTime}→${ev.endTime||'?'} · ${cfg.label||''}</div><div class="dv-ev-xp">${done?'✓':'+'}${ev.xp||0}</div></div>`;
   });
+  html+=`</div></div>`;
   document.getElementById('day-timeline').innerHTML=html||'<div class="empty-state">No events. Click a time slot to add one.</div>';
 }
 
@@ -1948,12 +2016,23 @@ function toggleComplete(evId,ds){
   const done=calIsComplete(ev,ds);
   if(done){ev.completedDates=ev.completedDates.filter(d=>d!==ds);G.hunter.totalXP=Math.max(0,G.hunter.totalXP-(ev.xp||0));toast(`Undone: ${ev.title}`,'neg');}
   else{ev.completedDates.push(ds);G.hunter.totalXP+=(ev.xp||0);if(ev.stat)G.stats[ev.stat]=(G.stats[ev.stat]||0)+1;toast(`✓ ${ev.title} +${ev.xp||0} XP!`,'pos');}
-  save();renderHeader();openEDP(evId,ds);renderCalView();
+  saveCalEventToLocal(ev);
+  save();
+  if(typeof window.syncCalEvent==='function')window.syncCalEvent(ev);
+  renderHeader();openEDP(evId,ds);renderCalView();
 }
 function deleteCalEvent(evId,ds){
   const ev=G.calEvents.find(e=>e.id===evId);if(!ev)return;
-  if(ev.recur&&ev.recur!=='none'){if(!ev.exceptions)ev.exceptions=[];ev.exceptions.push(ds);toast('Occurrence removed','info');}
-  else{G.calEvents=G.calEvents.filter(e=>e.id!==evId);toast('Event deleted','neg');}
+  if(ev.recur&&ev.recur!=='none'){
+    if(!ev.exceptions)ev.exceptions=[];ev.exceptions.push(ds);
+    saveCalEventToLocal(ev);
+    if(typeof window.syncCalEvent==='function')window.syncCalEvent(ev);
+    toast('Occurrence removed','info');
+  }else{
+    deleteCalEventFromLocal(evId);
+    if(typeof window.deleteCloudCalEvent==='function')window.deleteCloudCalEvent(evId);
+    toast('Event deleted','neg');
+  }
   closeEDP();save();renderCalView();
 }
 
@@ -1985,6 +2064,8 @@ function saveCalEvent(){
   const evData={id:existingId||'ev'+Date.now(),title,cat:document.getElementById('ev-cat').value,xp:parseInt(document.getElementById('ev-xp').value)||0,date:document.getElementById('ev-date').value,startTime:document.getElementById('ev-start').value||null,endTime:document.getElementById('ev-end').value||null,desc:document.getElementById('ev-desc').value.trim(),recur:document.getElementById('ev-recur').value,recurDays,priority:document.getElementById('ev-priority').value,stat:document.getElementById('ev-stat').value||null,reminder:document.getElementById('ev-reminder').value,isDeadline,workBlockDur:isDeadline?parseInt(document.getElementById('ev-workblock-dur').value)||0:0,workBlockDays:isDeadline?parseInt(document.getElementById('ev-workblock-days').value)||0:0,completedDates:existingId?(G.calEvents.find(e=>e.id===existingId)?.completedDates||[]):[],exceptions:existingId?(G.calEvents.find(e=>e.id===existingId)?.exceptions||[]):[],};
   if(existingId){const idx=G.calEvents.findIndex(e=>e.id===existingId);if(idx>=0)G.calEvents[idx]=evData;toast('Event updated!','pos');}
   else{G.calEvents.push(evData);toast('Event created!','pos');}
+  saveCalEventToLocal(evData);
+  if(typeof window.syncCalEvent==='function')window.syncCalEvent(evData);
   save();closeModal();renderCalView();
 }
 
@@ -2009,6 +2090,95 @@ function exportData(){const blob=new Blob([JSON.stringify(G,null,2)],{type:'appl
 function importData(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.hunter||!d.stats){toast('Invalid save!','neg');return;}load();save();renderAll();toast(`Welcome back, ${G.hunter.name}!`,'badge');}catch(err){toast('Failed to import','neg');}};reader.readAsText(file);e.target.value='';}
 
 // ═══════════════════════════════════════════════════════
+// ICS EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════
+function icsDate(dateStr,timeStr){
+  // Returns YYYYMMDDTHHMMSS (local, no Z) for DTSTART/DTEND
+  const d=dateStr.replace(/-/g,'');
+  if(!timeStr)return'VALUE=DATE:'+d;
+  const t=timeStr.replace(':','')+'00';
+  return d+'T'+t;
+}
+function escICS(s){return(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');}
+function exportICS(){
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//HunterOS//EN','CALSCALE:GREGORIAN'];
+  G.calEvents.forEach(ev=>{
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:'+ev.id+'@hunteros');
+    const dtstart=icsDate(ev.date,ev.startTime);
+    const dtend=ev.endTime?icsDate(ev.date,ev.endTime):icsDate(ev.date,ev.startTime);
+    if(dtstart.startsWith('VALUE=DATE:')){
+      lines.push('DTSTART;'+dtstart);
+      lines.push('DTEND;'+dtend);
+    }else{
+      lines.push('DTSTART:'+dtstart);
+      lines.push('DTEND:'+dtend);
+    }
+    lines.push('SUMMARY:'+escICS(ev.title));
+    let desc=ev.desc||'';
+    if(ev.xp)desc+=' [XP:'+ev.xp+']';
+    if(ev.cat)desc+=' [CAT:'+ev.cat+']';
+    if(ev.completedDates&&ev.completedDates.length)desc+=' [COMPLETED:'+ev.completedDates.join(',')+']';
+    if(desc)lines.push('DESCRIPTION:'+escICS(desc));
+    if(ev.recur==='daily')lines.push('RRULE:FREQ=DAILY');
+    else if(ev.recur==='weekly')lines.push('RRULE:FREQ=WEEKLY');
+    else if(ev.recur==='custom'&&ev.recurDays&&ev.recurDays.length){
+      const dayMap=['SU','MO','TU','WE','TH','FR','SA'];
+      lines.push('RRULE:FREQ=WEEKLY;BYDAY='+ev.recurDays.map(d=>dayMap[d]).join(','));
+    }
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='hunter-os-calendar.ics';a.click();
+  URL.revokeObjectURL(url);
+  toast('Calendar exported!','pos');
+}
+function importICS(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const text=ev.target.result;
+    const blocks=text.split('BEGIN:VEVENT').slice(1);
+    let added=0;
+    blocks.forEach(block=>{
+      const get=key=>{const m=block.match(new RegExp(key+'(?:;[^:]*)?:([^\\r\\n]*)'));return m?m[1].trim():'';};
+      const uid=get('UID').replace('@hunteros','');
+      if(!uid)return;
+      if(G.calEvents.find(e=>e.id===uid))return; // deduplicate
+      const summary=get('SUMMARY').replace(/\\[,;\\n]/g,s=>({'\\\\':`\\`,'\\;':';','\\,':',','\\n':'\n'}[s]||s));
+      if(!summary)return;
+      let dtstart=get('DTSTART');
+      let date='',startTime=null,endTime=null;
+      if(dtstart.length>=8){
+        date=dtstart.slice(0,4)+'-'+dtstart.slice(4,6)+'-'+dtstart.slice(6,8);
+        if(dtstart.length>=15&&dtstart[8]==='T'){startTime=dtstart.slice(9,11)+':'+dtstart.slice(11,13);}
+      }
+      let dtend=get('DTEND');
+      if(dtend.length>=15&&dtend[8]==='T'){endTime=dtend.slice(9,11)+':'+dtend.slice(11,13);}
+      const rawDesc=get('DESCRIPTION');
+      const desc=rawDesc.replace(/\\[,;\\n]/g,s=>({'\\\\':`\\`,'\\;':';','\\,':',','\\n':'\n'}[s]||s));
+      const xpMatch=desc.match(/\[XP:(\d+)\]/);const catMatch=desc.match(/\[CAT:(\w+)\]/);
+      const cleanDesc=desc.replace(/\s*\[(?:XP|CAT|COMPLETED):[^\]]*\]/g,'').trim();
+      const rrule=get('RRULE');
+      let recur='none';
+      if(/FREQ=DAILY/.test(rrule))recur='daily';
+      else if(/FREQ=WEEKLY/.test(rrule))recur='weekly';
+      if(!date)return;
+      const _icsEv={id:uid,title:summary,cat:catMatch?catMatch[1]:'personal',xp:xpMatch?parseInt(xpMatch[1]):0,date,startTime,endTime,desc:cleanDesc,recur,recurDays:[],priority:'normal',stat:null,reminder:'none',isDeadline:false,workBlockDur:0,workBlockDays:0,completedDates:[],exceptions:[]};
+      saveCalEventToLocal(_icsEv);
+      if(typeof window.syncCalEvent==='function')window.syncCalEvent(_icsEv);
+      added++;
+    });
+    save();renderCalView();
+    toast(`${added} event${added!==1?'s':''} imported`,'pos');
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ═══════════════════════════════════════════════════════
 // RENDER ALL + INIT
 // ═══════════════════════════════════════════════════════
 function renderAll(){
@@ -2031,8 +2201,9 @@ function init(){
 (function(){
   // ─── CONFIG ─────────────────────────────────────────────────────────
   const SUPABASE_URL = 'https://rgojqwywhpzmnnoaslfe.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnb2pxd3l3aHB6bW5ub2FzbGZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMDUyODksImV4cCI6MjA5MjY4MTI4OX0.gKO_OUbHlN8NRZ-eSqT2vvuolq4nMx-d2D7ZG0BxI3Q';
+  const SUPABASE_ANON_KEY = 'sb_publishable_xTKb3giJH_H9NWPQaa4CDw_I_NN6_es';
   const TABLE = 'user_data';
+  const CAL_TABLE = 'calendar_events';
   const LOCAL_KEY = 'hos4';
   const LOCAL_META_KEY = 'hos_sync_meta'; // tracks last cloud sync timestamp
   const DEBOUNCE_MS = 2000;
@@ -2075,17 +2246,12 @@ function init(){
   }
 
   // ─── LOAD/SAVE WRAPPERS ─────────────────────────────────────────────
-  // Reads the localStorage blob (whatever load() would parse)
   function readLocalRaw(){
     const raw = localStorage.getItem(LOCAL_KEY);
     if(!raw) return null;
     try{ return JSON.parse(raw); }catch(e){ return null; }
   }
-  // Pushes the latest local state to cloud.
-  // We read from localStorage rather than window.G because the app uses
-  // `let G = {...}` at script top-level, which is block-scoped and NOT
-  // attached to window. localStorage is always up to date because save()
-  // writes to it synchronously before our debounced push fires.
+
   async function pushToCloud(){
     if(!currentUser) return;
     const raw = localStorage.getItem(LOCAL_KEY);
@@ -2111,7 +2277,7 @@ function init(){
       isSyncing = false;
     }
   }
-  // Fetches cloud row for current user
+
   async function fetchCloud(){
     if(!currentUser) return null;
     const { data, error } = await sb
@@ -2120,7 +2286,107 @@ function init(){
       .eq('user_id', currentUser.id)
       .maybeSingle();
     if(error){ console.error('[sync] fetch failed', error); throw error; }
-    return data; // null if no row
+    return data;
+  }
+
+  // ─── CALENDAR EVENTS TABLE ──────────────────────────────────────────
+  function evToRow(ev){
+    return {
+      id:              ev.id,
+      user_id:         currentUser.id,
+      title:           ev.title,
+      cat:             ev.cat||'personal',
+      xp:              ev.xp||0,
+      date:            ev.date,
+      start_time:      ev.startTime||null,
+      end_time:        ev.endTime||null,
+      description:     ev.desc||null,
+      recur:           ev.recur||'none',
+      recur_days:      ev.recurDays||[],
+      priority:        ev.priority||'normal',
+      stat:            ev.stat||null,
+      reminder:        ev.reminder||'none',
+      is_deadline:     ev.isDeadline||false,
+      workblock_dur:   ev.workBlockDur||0,
+      workblock_days:  ev.workBlockDays||0,
+      completed_dates: ev.completedDates||[],
+      exceptions:      ev.exceptions||[],
+      updated_at:      new Date().toISOString(),
+    };
+  }
+
+  function rowToEv(row){
+    return {
+      id:             row.id,
+      title:          row.title,
+      cat:            row.cat,
+      xp:             row.xp,
+      date:           row.date,
+      startTime:      row.start_time,
+      endTime:        row.end_time,
+      desc:           row.description||'',
+      recur:          row.recur,
+      recurDays:      row.recur_days||[],
+      priority:       row.priority,
+      stat:           row.stat,
+      reminder:       row.reminder,
+      isDeadline:     row.is_deadline,
+      workBlockDur:   row.workblock_dur,
+      workBlockDays:  row.workblock_days,
+      completedDates: row.completed_dates||[],
+      exceptions:     row.exceptions||[],
+    };
+  }
+
+  async function fetchCloudCalEvents(){
+    if(!currentUser) return [];
+    const { data, error } = await sb
+      .from(CAL_TABLE)
+      .select('*')
+      .eq('user_id', currentUser.id);
+    if(error){ console.error('[sync] cal fetch failed', error); return []; }
+    return (data||[]).map(rowToEv);
+  }
+
+  async function upsertCloudCalEvent(ev){
+    if(!currentUser) return;
+    try{
+      const { error } = await sb.from(CAL_TABLE)
+        .upsert(evToRow(ev), { onConflict: 'id' });
+      if(error) throw error;
+    }catch(err){ console.error('[sync] cal upsert failed', err); }
+  }
+
+  async function hardDeleteCloudCalEvent(evId){
+    if(!currentUser) return;
+    try{
+      const { error } = await sb.from(CAL_TABLE)
+        .delete()
+        .eq('user_id', currentUser.id)
+        .eq('id', evId);
+      if(error) throw error;
+    }catch(err){ console.error('[sync] cal delete failed', err); }
+  }
+
+  // Expose hooks for the main app to call
+  window.syncCalEvent = function(ev){ upsertCloudCalEvent(ev); };
+  window.deleteCloudCalEvent = function(evId){ hardDeleteCloudCalEvent(evId); };
+
+  // ─── MIGRATION: embedded calEvents → calendar_events table ──────────
+  async function migrateEmbeddedCalEvents(mainBlob){
+    const embedded = mainBlob.calEvents;
+    if(!embedded || !embedded.length) return;
+    console.log('[sync] migrating', embedded.length, 'embedded cal events to calendar_events table');
+    for(const ev of embedded){
+      await upsertCloudCalEvent(ev);
+    }
+    // Strip calEvents from the main blob and re-push
+    delete mainBlob.calEvents;
+    await sb.from(TABLE).upsert({
+      user_id: currentUser.id,
+      data: mainBlob,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
   }
 
   // ─── DEBOUNCED SAVE WRAPPER ─────────────────────────────────────────
@@ -2144,58 +2410,80 @@ function init(){
   }
 
   // ─── BOOT SEQUENCE ──────────────────────────────────────────────────
-  // After successful auth, decide what to do with cloud vs local data, then run the app's init()
   async function bootApp(){
     setPill('syncing','LOADING');
-    let cloudRow = null;
-    try{ cloudRow = await fetchCloud(); }
-    catch(e){ /* network / RLS issue — fall back to local */ }
+    let cloudRow = null, cloudCalEvents = [];
+    try{
+      [cloudRow, cloudCalEvents] = await Promise.all([fetchCloud(), fetchCloudCalEvents()]);
+    }catch(e){ /* network / RLS issue — fall back to local */ }
 
     const localRaw = readLocalRaw();
     const meta = getMeta();
     const sameUser = meta.userId === currentUser.id;
 
+    // Helper: write cloud cal events to local cal store — always write so
+    // load() finds hos4_cal before init() runs, even if the array is empty
+    function applyCloudCal(evs){
+      localStorage.setItem('hos4_cal', JSON.stringify(evs||[]));
+    }
+
     // Case A: no cloud row, no local data → fresh start
     if(!cloudRow && !localRaw){
       finishBoot('fresh');
-      // After init(), push the empty fresh state up so a row exists
       setTimeout(()=>pushToCloud(), 500);
       return;
     }
     // Case B: cloud exists, local empty (or different user) → use cloud
     if(cloudRow && (!localRaw || !sameUser)){
-      localStorage.setItem(LOCAL_KEY, JSON.stringify(cloudRow.data));
+      const mainBlob = cloudRow.data || {};
+      // Migration: if cloud blob still has embedded calEvents, move them
+      if(mainBlob.calEvents && mainBlob.calEvents.length && cloudCalEvents.length === 0){
+        await migrateEmbeddedCalEvents(mainBlob);
+        cloudCalEvents = mainBlob.calEvents;
+        delete mainBlob.calEvents;
+      }
+      localStorage.setItem(LOCAL_KEY, JSON.stringify(mainBlob));
+      applyCloudCal(cloudCalEvents);
       setMeta({ lastPush: cloudRow.updated_at, userId: currentUser.id });
       finishBoot('cloud');
       return;
     }
-    // Case C: local exists, no cloud row → push local up (first-login migration)
+    // Case C: local exists, no cloud row → push local up
     if(!cloudRow && localRaw){
+      // Migrate any embedded calEvents from the local blob to the cal table
+      if(localRaw.calEvents && localRaw.calEvents.length){
+        for(const ev of localRaw.calEvents) await upsertCloudCalEvent(ev);
+        localStorage.setItem('hos4_cal', JSON.stringify(localRaw.calEvents));
+        delete localRaw.calEvents;
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(localRaw));
+      }
       finishBoot('local-migrate');
-      setTimeout(()=>pushToCloud(), 500); // after init reads local
+      setTimeout(()=>pushToCloud(), 500);
       return;
     }
-    // Case D: both exist — compare
-    // If meta.lastPush matches cloud.updated_at → local has unsynced edits → push local
-    // If they differ → real conflict → ask user
-    // Compare as milliseconds: Postgres may serialize the same instant slightly
-    // differently than the JS-emitted ISO string (e.g. "+00:00" vs "Z"), so
-    // a string === string check would produce false negatives.
+    // Case D: both exist — compare timestamps
     const sameTs = meta.lastPush && cloudRow.updated_at &&
                    new Date(meta.lastPush).getTime() === new Date(cloudRow.updated_at).getTime();
     if(cloudRow && localRaw && sameUser && sameTs){
+      // Migration: if cloud blob still has embedded calEvents
+      const mainBlob = cloudRow.data || {};
+      if(mainBlob.calEvents && mainBlob.calEvents.length && cloudCalEvents.length === 0){
+        await migrateEmbeddedCalEvents(mainBlob);
+        cloudCalEvents = mainBlob.calEvents;
+      }
+      applyCloudCal(cloudCalEvents);
       finishBoot('local');
       setTimeout(()=>pushToCloud(), 500);
       return;
     }
-    // Real conflict
+    // Real conflict — show modal (cal events: cloud wins automatically per spec)
+    applyCloudCal(cloudCalEvents);
     showConflictModal(cloudRow, localRaw);
   }
 
   function finishBoot(mode){
     hideAuth();
     setPill('synced','SYNCED');
-    // Now run the app's normal init() — it will read whatever is in localStorage
     if(typeof window.init === 'function'){
       window.init();
     }
@@ -2304,9 +2592,12 @@ function init(){
       (async ()=>{
         try{
           setPill('syncing','PULLING');
-          const row = await fetchCloud();
+          const [row, calEvs] = await Promise.all([fetchCloud(), fetchCloudCalEvents()]);
           if(!row){ alert('No cloud data to pull.'); setPill('synced','SYNCED'); return; }
-          localStorage.setItem(LOCAL_KEY, JSON.stringify(row.data));
+          const mainBlob = row.data || {};
+          if(mainBlob.calEvents) delete mainBlob.calEvents; // strip legacy embedded
+          localStorage.setItem(LOCAL_KEY, JSON.stringify(mainBlob));
+          if(calEvs && calEvs.length) localStorage.setItem('hos4_cal', JSON.stringify(calEvs));
           setMeta({ lastPush: row.updated_at, userId: currentUser.id });
           location.reload();
         }catch(e){ setPill('error','PULL ERR'); }
